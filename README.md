@@ -173,11 +173,11 @@ To get the object scale(max vertice distance), you can run
 
 ```python
 python getmeshscale.py
-``
+```
 
 This should be everything you need, please don't forget to update the camera calibration parameters in singleshotpose as well.
 
-If you encounter any problems with the code, want to report bugs, etc. please contact me at fan.wang2[at]duke[dot]edu.
+If you encounter any problems with the code, want to report bugs, etc. please contact me at faninedinburgh[at]gmail[dot]com.
 
 
 
