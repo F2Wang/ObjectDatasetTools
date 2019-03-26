@@ -51,7 +51,7 @@ Note: the code was written for opencv ver > 3.0.0 and ver < 3.4.3, so the code s
 install opencv anew as instructed. However, if you have already installed opencv, the code
 may need adjustment since different versions of opencv has slightly different API
 
-Step 5:
+(Optional)Step 5:
 
 Install librealsense and pyrealsense wrapper ( if you are using realsense camera F200, SR300)
 
