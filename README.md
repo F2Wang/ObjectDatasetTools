@@ -16,7 +16,7 @@ This code is released under the MIT License (refer to the LICENSE file for detai
 
 Installation has been tested on a fresh install of Ubuntu 16.04 with Python 2.7
 
-Step 1:
+### Step 1:
 
 Upgrading any pre-install packages
 
@@ -24,7 +24,7 @@ Upgrading any pre-install packages
 sudo apt-get update
 sudo apt-get upgrade
 ```
-Step 2:
+### Step 2:
 
 Install pip, a Python package manager, and update
 
@@ -32,7 +32,7 @@ Install pip, a Python package manager, and update
 sudo apt install python-pip
 sudo -H pip2 install --upgrade pip
 ```
-Step 3:
+### Step 3:
 
 Install the required packages through apt-get
 
@@ -40,7 +40,7 @@ Install the required packages through apt-get
 sudo apt-get install build-essential cmake git pkg-config libssl-dev
 ```
 
-Step 4:
+### Step 4:
 
 Install the required packages through pip
 
@@ -51,9 +51,9 @@ Note: the code was written for opencv ver > 3.0.0 and ver < 3.4.3, so the code s
 install opencv anew as instructed. However, if you have already installed opencv, the code
 may need adjustment since different versions of opencv has slightly different API
 
-(Optional)Step 5:
+### Step 5 (Optional):
 
-Install librealsense and pyrealsense wrapper ( if you are using realsense camera F200, SR300)
+Install librealsense and pyrealsense wrapper (if you are using realsense camera F200, SR300)
 
 Note: If you do not need to use python wrapper for the driver, please install the latest sdk which is easy to install, the python wrapper only supports the legacy version, which is not supported anymore and its installation manual is wrong.
 
@@ -88,7 +88,7 @@ git checkout v1.12.1
 Make sure that the depth camera is unplugged, and follow the installation steps in
 (https://github.com/IntelRealSense/librealsense/blob/v1.12.1/doc/installation.md)
 
-### Except
+#### NOTE
 
 When you run ./scripts/patch-uvcvideo-16.04.simple.sh, you will get this error: /bin/bash: ./scripts/ubuntu-retpoline-extract-one: No such file or directory
 
@@ -130,6 +130,8 @@ Note that you need to put correct camera calibration parameters in config/DataAc
 python getdepthintrinsic.py
 ```
 If you are using other cameras, please put color images in JPEGImages folder and the aligned depth images in the depth folder. Color aligned to depth images are recommended since the code assumes that for each non-black keypoint detected in the color image, there is a corresponding depth reading in the depth image
+
+If you don't know your camera's intrinsics, you can put a rough estimate in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
 
 3.  Register all frames and obtain a raw object mesh
 
