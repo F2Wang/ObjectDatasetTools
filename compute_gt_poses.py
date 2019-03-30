@@ -312,7 +312,7 @@ if __name__ == "__main__":
         print "Apply post processing"
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
         ply = Ply(points, colors)
-        meshfile = path + '%s.ply' % (path[5:-1])
+        meshfile = path + '%s.ply' % (path[8:-1])
        
         ply.write(meshfile)
         Ts = np.array(Ts)

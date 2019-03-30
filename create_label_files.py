@@ -61,6 +61,7 @@ if __name__ == "__main__":
     K = get_camera_intrinsic()
   
     for classlabel,folder in enumerate(folders):
+        classlabel = 1
         print folder
         path_label = folder + "labels"
         if not os.path.exists(path_label):
@@ -68,7 +69,7 @@ if __name__ == "__main__":
 
         transforms_file = folder + 'transforms.npy'
         transforms = np.load(transforms_file)
-        mesh = trimesh.load(folder + folder[5:-1] +".ply")
+        mesh = trimesh.load(folder + folder[8:-1] +".ply")
     
         points = mesh.bounding_box.vertices
         center = mesh.centroid
