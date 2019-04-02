@@ -59,18 +59,23 @@ if __name__ == "__main__":
         exit()
 
     K = get_camera_intrinsic()
-  
+
     for classlabel,folder in enumerate(folders):
-        classlabel = 1
+        classlabel = 9
         print folder
         path_label = folder + "labels"
         if not os.path.exists(path_label):
-              os.makedirs(path_label)
+            os.makedirs(path_label)
+
+        path_mask = folder + "mask"
+        if not os.path.exists(path_mask):
+            os.makedirs(path_mask)
+
 
         transforms_file = folder + 'transforms.npy'
         transforms = np.load(transforms_file)
         mesh = trimesh.load(folder + folder[8:-1] +".ply")
-    
+
         points = mesh.bounding_box.vertices
         center = mesh.centroid
         min_x = np.min(points[:,0])
@@ -104,12 +109,30 @@ if __name__ == "__main__":
             masks = compute_projection(sample_points,K)
             masks = masks.T
 
-      
+
             min_x = np.min(masks[:,0])
             min_y = np.min(masks[:,1])
             max_x = np.max(masks[:,0])
             max_y = np.max(masks[:,1])
 
+
+            image_mask = np.zeros(img.shape[:2],dtype = np.uint8)
+            for pixel in masks:
+                cv2.circle(image_mask,(int(pixel[0]),int(pixel[1])), 5, 255, -1)
+   
+            thresh = cv2.threshold(image_mask, 30, 255, cv2.THRESH_BINARY)[1]
+    
+            _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+            cnt = max(contours, key=cv2.contourArea)
+    
+            image_mask = np.zeros(img.shape[:2],dtype = np.uint8)
+            cv2.drawContours(image_mask, [cnt], -1, 255, -1)
+
+            mask_path = path_mask+"/"+ str(i*LABEL_INTERVAL)+".png"
+            cv2.imwrite(mask_path, image_mask)
+                
+            
+            
             file = open(path_label+"/"+ str(i*LABEL_INTERVAL)+".txt","w")
             message = str(classlabel)[:8] + " "
             file.write(message)
@@ -121,4 +144,5 @@ if __name__ == "__main__":
             file.write(message) 
             message = str((max_y-min_y)/480.0)[:8]
             file.write(message)
-            file.close() 
+            file.close()
+
