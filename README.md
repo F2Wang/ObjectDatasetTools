@@ -116,7 +116,7 @@ sudo python setup.py install
 1. Color print the pdf with the correctly sized aruco markers in arucomarkers folder. Affix the markers surrounding the object of interest as shown in the picture.
 ![BackFlow](doc/1.jpg)
 
-2. Record an object sequence, record.py records an object video sequence after a countdown of 5 seconds. Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time.
+2. Record an object sequence, record.py records an object video sequence after a countdown of 5 seconds. Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time. For optimal results, start the filming with camera pointing top down towards the object of interest.
 
 Assume the object being recorded is a sugar box.
 
