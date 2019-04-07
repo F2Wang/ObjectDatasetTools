@@ -59,9 +59,9 @@ if __name__ == "__main__":
         exit()
 
     K = get_camera_intrinsic()
-
+    
     for classlabel,folder in enumerate(folders):
-        classlabel = 9
+        classlabel = 13
         print folder
         path_label = folder + "labels"
         if not os.path.exists(path_label):
@@ -76,6 +76,12 @@ if __name__ == "__main__":
         transforms = np.load(transforms_file)
         mesh = trimesh.load(folder + folder[8:-1] +".ply")
 
+        Tform = mesh.apply_obb()
+        mesh.export(file_obj = folder + folder[8:-1] +".ply")
+
+        
+        
+
         points = mesh.bounding_box.vertices
         center = mesh.centroid
         min_x = np.min(points[:,0])
@@ -89,15 +95,19 @@ if __name__ == "__main__":
                            [max_x, max_y, min_z], [max_x, max_y, max_z]])
 
         points_original = np.concatenate((np.array([[center[0],center[1],center[2]]]), points))
+        points_original = trimesh.transformations.transform_points(points_original, np.linalg.inv(Tform))
+                    
         projections = [[],[]]
         for i in trange(len(transforms)):
             mesh_copy = mesh.copy()
+            mesh_copy.apply_transform(np.linalg.inv(Tform))
 
             img = cv2.imread(folder+"JPEGImages/" + str(i*LABEL_INTERVAL) + ".jpg")
             transform = transforms[i]
             transform = np.linalg.inv(transform)
             transformed = trimesh.transformations.transform_points(points_original, transform)
 
+            
             corners = compute_projection(transformed,K)
             corners = corners.T
             corners[:,0] = corners[:,0]/640
