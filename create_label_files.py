@@ -15,15 +15,17 @@ import os
 import sys
 from tqdm import trange
 from scipy.optimize import minimize
-from config.DataAcquisitionParameters import SERIAL,camera_intrinsics
 from config.registrationParameters import *
+import json
 
-def get_camera_intrinsic():
-    global camera_intrinsics
+def get_camera_intrinsic(folder):
+    with open(folder+'intrinsics.json', 'r') as f:
+        camera_intrinsics = json.load(f)
+
 
     K = np.zeros((3, 3), dtype='float64')
-    K[0, 0], K[0, 2] = camera_intrinsics[SERIAL]['fx'], camera_intrinsics[SERIAL]['ppx']
-    K[1, 1], K[1, 2] = camera_intrinsics[SERIAL]['fy'], camera_intrinsics[SERIAL]['ppy']
+    K[0, 0], K[0, 2] = float(camera_intrinsics['fx']), float(camera_intrinsics['ppx'])
+    K[1, 1], K[1, 2] = float(camera_intrinsics['fy']), float(camera_intrinsics['ppy'])
 
     K[2, 2] = 1.
     return K
@@ -58,11 +60,10 @@ if __name__ == "__main__":
         print_usage()
         exit()
 
-    K = get_camera_intrinsic()
     
     for classlabel,folder in enumerate(folders):
-        classlabel = 13
-        print folder
+        print folder[8:-1], "is assigned class label:", classlabel
+        K = get_camera_intrinsic(folder)
         path_label = folder + "labels"
         if not os.path.exists(path_label):
             os.makedirs(path_label)
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
         transforms_file = folder + 'transforms.npy'
         transforms = np.load(transforms_file)
-        mesh = trimesh.load(folder + folder[8:-1] +".ply")
+        mesh = trimesh.load(folder + "registeredScene.ply")
 
         Tform = mesh.apply_obb()
         mesh.export(file_obj = folder + folder[8:-1] +".ply")
@@ -132,7 +133,8 @@ if __name__ == "__main__":
    
             thresh = cv2.threshold(image_mask, 30, 255, cv2.THRESH_BINARY)[1]
     
-            _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+            _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+                                              cv2.CHAIN_APPROX_SIMPLE)
             cnt = max(contours, key=cv2.contourArea)
     
             image_mask = np.zeros(img.shape[:2],dtype = np.uint8)

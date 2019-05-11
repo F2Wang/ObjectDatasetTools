@@ -29,7 +29,7 @@ def nearest_neighbour(a, b):
 
 
 
-def convert_depth_frame_to_pointcloud(depth_image, serialnumber, camera_intrinsics):
+def convert_depth_frame_to_pointcloud(depth_image, camera_intrinsics):
         
 	"""
 	Convert the depthmap to a 3D point cloud
@@ -37,8 +37,7 @@ def convert_depth_frame_to_pointcloud(depth_image, serialnumber, camera_intrinsi
 	-----------
 	depth_frame : (m,n) uint16
 		The depth_frame containing the depth map
-        serialnumber : string
-                The serial number of the camera used
+
 	camera_intrinsics : dict 
                 The intrinsic values of the depth imager in whose coordinate system the depth_frame is computed
 	Return:
@@ -53,8 +52,8 @@ def convert_depth_frame_to_pointcloud(depth_image, serialnumber, camera_intrinsi
 	nx = np.linspace(0, width-1, width)
 	ny = np.linspace(0, height-1, height)
 	u, v = np.meshgrid(nx, ny)
-	x = (u.flatten() - camera_intrinsics[serialnumber]['ppx'])/camera_intrinsics[serialnumber]['fx']
-	y = (v.flatten() - camera_intrinsics[serialnumber]['ppy'])/camera_intrinsics[serialnumber]['fy']
+	x = (u.flatten() - float(camera_intrinsics['ppx']))/float(camera_intrinsics['fx'])
+	y = (v.flatten() - float(camera_intrinsics['ppy']))/float(camera_intrinsics['fy'])
         depth_image = depth_image*1.0/65535*8.0
 	z = depth_image.flatten()
 	x = np.multiply(x,z)

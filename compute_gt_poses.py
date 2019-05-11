@@ -6,6 +6,7 @@ Main Function for registering (aligning) colored point clouds with ICP/aruco mar
 matching as well as pose graph optimizating
 
 """
+import random
 import cv2.aruco as aruco
 from open3d import *
 import numpy as np
@@ -20,7 +21,7 @@ from pykdtree.kdtree import KDTree
 import time
 import sys
 from config.registrationParameters import *
-from config.DataAcquisitionParameters import SERIAL,camera_intrinsics
+import json
 
 # Set up parameters for registration
 # voxel sizes use to down sample raw pointcloud for fast ICP
@@ -47,9 +48,6 @@ def marker_registration(source,target, MIN_MATCH_COUNT = 12):
      gray_des = cv2.cvtColor(cad_des, cv2.COLOR_RGB2GRAY)
      aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
      parameters = aruco.DetectorParameters_create()
-     # cv2.imshow('frame',cad_des)
-     # if cv2.waitKey(0) & 0xFF == ord('q'):
-     #      print "yes"
     
      #lists of ids and the corners beloning to each id
      corners_src, _ids_src, rejectedImgPoints = aruco.detectMarkers(gray_src, aruco_dict, parameters=parameters)
@@ -71,13 +69,11 @@ def marker_registration(source,target, MIN_MATCH_COUNT = 12):
           if id in ids_src:
                j = ids_src.index(id)
                for count,corner in enumerate(corners_src[j][0]):
-                    src_good.append(depth_src[int(corner[1])][int(corner[0])])
-                    cv2.putText(cad_src, str(id)+" "+str(count), (int(corner[0]),int(corner[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0),1,cv2.LINE_AA)
-               for count,corner in enumerate(corners_des[i][0]):
-                    dst_good.append(depth_des[int(corner[1])][int(corner[0])])
-                    cv2.putText(cad_des, str(id)+" "+str(count), (int(corner[0]),int(corner[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0),1,cv2.LINE_AA)
-
-     show = np.hstack((cad_src, cad_des))
+                    feature_3D_src = depth_src[int(corner[1])][int(corner[0])]
+                    feature_3D_des = depth_des[int(corners_des[i][0][count][1])][int(corners_des[i][0][count][0])]
+                    if feature_3D_src[2]!=0 and feature_3D_des[2]!=0:
+                         src_good.append(feature_3D_src)
+                         dst_good.append(feature_3D_des)
     
      # get rigid transforms between 2 set of feature points through ransac
      try:
@@ -142,17 +138,24 @@ def post_process(originals, voxel_Radius, inlier_Radius):
 
      return (points,colors,vote) 
   
-def full_registration(pcds,max_correspondence_distance_coarse,
+def full_registration(path,max_correspondence_distance_coarse,
                       max_correspondence_distance_fine):
 
-     global N_Neighbours
+     global N_Neighbours, LABEL_INTERVAL
      pose_graph = PoseGraph()
      odometry = np.identity(4)
      pose_graph.nodes.append(PoseGraphNode(odometry))
-     n_pcds = len(pcds)
+     n_pcds = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
+     pcds = [[] for i in range(n_pcds)]
      for source_id in trange(n_pcds):
+          if source_id > 0:
+               pcds[source_id-1] = []
           for target_id in range(source_id + 1, min(source_id + N_Neighbours,n_pcds)):
-
+               if not pcds[source_id]:
+                    pcds[source_id] = load_pcd(path, source_id, downsample = True)
+               if not pcds[target_id]:
+                    pcds[target_id] = load_pcd(path, target_id, downsample = True)
+               
                # derive pairwise registration through feature matching
                color_src, depth_src  = load_images(path, source_id)
                color_dst, depth_dst  = load_images(path, target_id)
@@ -160,7 +163,8 @@ def full_registration(pcds,max_correspondence_distance_coarse,
                                       (color_dst, depth_dst))
 
                if res is None:
-                    # if marker_registration fails, perform pointcloud matching 
+                    # if marker_registration fails, perform pointcloud matching
+
                     transformation_icp, information_icp = icp(
                          pcds[source_id], pcds[target_id], voxel_size, max_correspondence_distance_coarse,
                          max_correspondence_distance_fine, method = ICP_METHOD)
@@ -170,7 +174,6 @@ def full_registration(pcds,max_correspondence_distance_coarse,
                     information_icp = get_information_matrix_from_point_clouds(
                          pcds[source_id], pcds[target_id], max_correspondence_distance_fine,
                          transformation_icp)
-        
 
                if target_id == source_id + 1:
                     # odometry
@@ -191,13 +194,14 @@ def load_images(path, ID):
     Load a color and a depth image by path and image ID 
 
     """
-
+    global camera_intrinsics
+    
     img_file = path + 'JPEGImages/%s.jpg' % (ID*LABEL_INTERVAL)
     cad = cv2.imread(img_file)
 
     depth_file = path + 'depth/%s.npy' % (ID*LABEL_INTERVAL)
     depth = np.load(depth_file)
-    pointcloud = convert_depth_frame_to_pointcloud(depth, SERIAL, camera_intrinsics)
+    pointcloud = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
     return (cad, pointcloud)
@@ -211,17 +215,19 @@ def load_pcds(path, downsample = True, interval = 1):
     """
     
 
-    global voxel_size 
+    global voxel_size, camera_intrinsics 
     pcds= []
     
     for Filename in xrange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
         img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
-        mask = cv2.imread(img_file, 0)         
+        # mask = cv2.imread(img_file, 0)
+        
         cad = cv2.imread(img_file)
         cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
         depth_file = path + 'depth/%s.npy' % (Filename*interval)
         depth = np.load(depth_file)
-        depth = convert_depth_frame_to_pointcloud(depth, SERIAL, camera_intrinsics)
+        mask = depth.copy()
+        depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
         source = PointCloud()
@@ -235,6 +241,38 @@ def load_pcds(path, downsample = True, interval = 1):
         else:
             pcds.append(source)
     return pcds
+
+
+def load_pcd(path, Filename, downsample = True, interval = 1):
+
+     """
+     load pointcloud by path and down samle (if True) based on voxel_size 
+     
+     """
+    
+
+     global voxel_size, camera_intrinsics 
+    
+ 
+     img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
+
+     cad = cv2.imread(img_file)
+     cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
+     depth_file = path + 'depth/%s.npy' % (Filename*interval)
+     depth = np.load(depth_file)
+     mask = depth.copy()
+     depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
+
+
+     source = PointCloud()
+     source.points = Vector3dVector(depth[mask>0])
+     source.colors = Vector3dVector(cad[mask>0])
+
+     if downsample == True:
+          source = voxel_down_sample(source, voxel_size = voxel_size)
+          estimate_normals(source, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
+       
+     return source
 
 
 def nearest_neighbour(a, b):
@@ -277,19 +315,20 @@ if __name__ == "__main__":
     except:
         print_usage()
         exit()
-        
+
     for path in folders:
+         
+    
         print path
+
+        with open(path+'intrinsics.json', 'r') as f:
+             camera_intrinsics = json.load(f)
+
         Ts = []
 
-
-        print "Load pointclouds ..."
-        pcds_down = load_pcds(path, downsample = True, interval = LABEL_INTERVAL)
-
         print "Full registration ..."
-        pose_graph = full_registration(pcds_down,
-                max_correspondence_distance_coarse,
-                max_correspondence_distance_fine)
+        pose_graph = full_registration(path, max_correspondence_distance_coarse,
+                                       max_correspondence_distance_fine)
 
         print "Optimizing PoseGraph ..."
         option = GlobalOptimizationOption(
@@ -304,19 +343,23 @@ if __name__ == "__main__":
         print "Merge segments"
         originals = load_pcds(path, downsample = False, interval = RECONSTRUCTION_INTERVAL)
 
-        for point_id in range(len(pcds_down)):
+        num_annotations = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
+
+        for point_id in range(num_annotations):
              Ts.append(pose_graph.nodes[point_id].pose)
+     
         for point_id in trange(len(originals)):
-             originals[point_id].transform(pose_graph.nodes[point_id*(RECONSTRUCTION_INTERVAL/LABEL_INTERVAL)].pose)
-             
+             print point_id*(RECONSTRUCTION_INTERVAL/LABEL_INTERVAL)
+             originals[point_id].transform(pose_graph.nodes[int(point_id*(RECONSTRUCTION_INTERVAL/LABEL_INTERVAL))].pose)
+
         print "Apply post processing"
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
         ply = Ply(points, colors)
-        meshfile = path + '%s.ply' % (path[8:-1])
-       
+        meshfile = path + 'registeredScene.ply'
+
         ply.write(meshfile)
         Ts = np.array(Ts)
         filename = path + 'transforms.npy'
         np.save(filename, Ts)
         print("Mesh saved")
-        
+

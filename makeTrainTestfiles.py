@@ -26,7 +26,8 @@ for classlabel,folder in enumerate(folders):
             # train on every 5th of the image
             if i%5 == 0:
                 filetrain.write(message)
-            filetest.write(message)
+            else:
+                filetest.write(message)
         filetrain.close()
         filetest.close()
     except:
