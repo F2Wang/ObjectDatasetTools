@@ -12,7 +12,7 @@ images and depth images
 # record for 60s after a 5s count down
 # or exit the recording earlier by pressing q
 
-RECORD_LENGTH = 20
+RECORD_LENGTH = 60
 
 
 import logging
