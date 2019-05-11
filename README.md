@@ -116,7 +116,7 @@ sudo python setup.py install
 1. Color print the pdf with the correctly sized aruco markers in arucomarkers folder. Affix the markers surrounding the object of interest as shown in the picture.
 ![BackFlow](doc/1.jpg)
 
-2. Record an object sequence, record.py records an object video sequence after a countdown of 5 seconds. Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time. For optimal results, start the filming with camera pointing top down towards the object of interest.
+2. Record an object sequence, record.py records an object video sequence after a countdown of 5 seconds for 1 minute, you can change the recording interval or exit the recording by pressing "q". Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time. 
 
 Assume the object being recorded is a sugar box.
 
@@ -124,12 +124,9 @@ Assume the object being recorded is a sugar box.
 python record.py LINEMOD/sugar
 ```
 
-Note that you need to put correct camera calibration parameters in config/DataAcquisitionParameters, if you are using the realsense camera, you can obtain those parameters by running 
+Note that the project assumes all sequences are saved under the folder named "LINEMOD", use other folder name will cause error. 
 
-```python
-python getdepthintrinsic.py
-```
-If you are using other cameras, please put color images in JPEGImages folder and the aligned depth images in the depth folder. Color aligned to depth images are recommended since the code assumes that for each non-black keypoint detected in the color image, there is a corresponding depth reading in the depth image
+If you are using a realsense camera, color images, depth aligned to color images, and camera parameters will be automatically saved under the directory of the sequence. If you are using other cameras, please put color images in JPEGImages folder and the aligned depth images in the depth folder. 
 
 If you don't know your camera's intrinsics, you can put a rough estimate in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
 
@@ -138,7 +135,7 @@ If you don't know your camera's intrinsics, you can put a rough estimate in. All
 ```python
 python compute_gt_poses.py LINEMOD/sugar
 ```
-Poses as a 4*4 homogenous transformations are saved for all frame as a .npy file, and a raw sugar.ply are saved under LINEMOD/sugar
+Poses as a 4*4 homogenous transformations are saved for all frame as a .npy file, and a raw registeredScene.ply are saved under LINEMOD/sugar
 
 4. Process the mesh
 
@@ -155,9 +152,19 @@ Make sure that the processed mesh is free of ANY isolated noise, and is NOT save
 When you have completed step 1-4 for all customized objects, run
 
 ```python
-python compute_gt_poses.py all
+python create_label_files.py all
 ```
-This step creates labels of ground truth poses for all your images. 
+or 
+
+```python
+python create_label_files.py LINEMOD/sugar
+```
+
+This step creates labels in the format singleshotpose requires as well as masks for all color images. It also creates new mesh files (e.g., sugar.ply) whose AABBs are centered at the origin and are the same dimensions as the OBB. Open those new mesh files in meshlab and save them again by unchecking the binary format option. Those files are used by singleshotpose for evaluation and pose estimation purpose, and singleshotpose cannot read mesh that is binary encoded.
+
+Currently, class labeled are assigned in a hacky way (e.g., by the order the folder is grabbed among all sequence folders), if you call create_label for each folder they will be asigned the same label, so please read the print out and change class label manually in create_label_files.py.
+
+
 
 ## (Optional) Create additional files required by singleshotpose
 
