@@ -1,10 +1,8 @@
 """
-register_segments.py
+register_segmented.py
 ---------------
-Create registered scene pointcloud with ambient noise removal
-The registered pointcloud includes the table top, markers, and some noise
-This mesh needs to be processed in a mesh processing tool to remove the artifact
-
+Create registered scene pointcloud with only the object of interest
+Use with caution, this script uses ad hoc rules for segmentation
 """
 import random
 import cv2.aruco as aruco
@@ -14,6 +12,7 @@ import cv2
 import os
 import glob
 from utils.ply import Ply
+from utils.plane import *
 from utils.camera import *
 from registration import icp, feature_registration, match_ransac, rigid_transform_3D
 from tqdm import trange
@@ -23,7 +22,9 @@ import sys
 from config.registrationParameters import *
 import json
 
-# Set up parameters for registration
+# Guess a max radius any part of the object of interest is away from the center of the observed markers
+MAX_RADIUS = 0.2
+# Parameters for registration
 # voxel sizes use to down sample raw pointcloud for fast ICP
 voxel_size = VOXEL_SIZE
 max_correspondence_distance_coarse = voxel_size * 15
@@ -93,7 +94,6 @@ def post_process(originals, voxel_Radius, inlier_Radius):
 
      return (points,colors,vote) 
 
-
 def load_pcds(path, downsample = True, interval = 1):
 
     """
@@ -107,7 +107,6 @@ def load_pcds(path, downsample = True, interval = 1):
     
     for Filename in trange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
         img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
-        # mask = cv2.imread(img_file, 0)
         
         cad = cv2.imread(img_file)
         cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
@@ -116,20 +115,48 @@ def load_pcds(path, downsample = True, interval = 1):
         mask = depth.copy()
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
+        aruco_center = get_aruco_center(cad,depth)
+        # remove plane and anything underneath the plane from the pointcloud
+        sol = findplane(cad,depth)
+        distance = point_to_plane(depth,sol)
+        sol = fitplane(sol,depth[(distance > -0.01) & (distance < 0.01)])
+        distance = point_to_plane(depth,sol)
+        mask[distance < 0.005] = 0
 
+        # use statistical outlier remover to remove isolated noise from the scene
+        distance2center = np.linalg.norm(depth - aruco_center, axis=2)
+        mask[distance2center > MAX_RADIUS] = 0
         source = PointCloud()
         source.points = Vector3dVector(depth[mask>0])
         source.colors = Vector3dVector(cad[mask>0])
 
+        cl,ind = statistical_outlier_removal(source,
+                                             nb_neighbors=500, std_ratio=0.5)
+
         if downsample == True:
-            pcd_down = voxel_down_sample(source, voxel_size = voxel_size)
+            pcd_down = voxel_down_sample(cl, voxel_size = voxel_size)
             estimate_normals(pcd_down, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
             pcds.append(pcd_down)
         else:
-            pcds.append(source)
+            pcds.append(cl)
     return pcds
 
+def get_aruco_center(cad,d):
+     gray = cv2.cvtColor(cad, cv2.COLOR_BGR2GRAY)
+     aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+     parameters = aruco.DetectorParameters_create()
+     #lists of ids and the corners beloning to each id
+     corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+     XYZ = []
+     if np.all(ids != None):
+          for index,cornerset in enumerate(corners):
+               cornerset = cornerset[0]
+               for corner in cornerset:
+                    if d[int(corner[1])][int(corner[0])][2]!= 0:
+                         XYZ.append(d[int(corner[1])][int(corner[0])])
 
+     XYZ = np.asarray(XYZ)
+     return np.mean(XYZ, axis = 0)
 
 def nearest_neighbour(a, b):
     """
@@ -153,9 +180,9 @@ def nearest_neighbour(a, b):
 
 def print_usage():
     
-    print "Usage: register_segments.py <path>"
+    print "Usage: register_segmented.py <path>"
     print "path: all or name of the folder"
-    print "e.g., register_segments.py all, register_segments.py LINEMOD/Cheezit"
+    print "e.g., register_segmented.py all, register_segmented.py LINEMOD/Cheezit"
     
     
 if __name__ == "__main__":
@@ -181,9 +208,9 @@ if __name__ == "__main__":
         Ts = np.load(path + 'transforms.npy')
 
 
-        print "Merge segments"
+        print "Load and segment frames"
         originals = load_pcds(path, downsample = False, interval = RECONSTRUCTION_INTERVAL)     
-        for point_id in trange(len(originals)):
+        for point_id in xrange(len(originals)):
              originals[point_id].transform(Ts[RECONSTRUCTION_INTERVAL/LABEL_INTERVAL*point_id])
 
         print "Apply post processing"
