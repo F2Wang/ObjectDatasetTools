@@ -2,11 +2,12 @@
 
 ## Introduction
 
-This repository contains tools to create a LINEMOD format dataset on customized items. The dataset can be used with various 6D object pose estimation projects such as singleshotpose. Ideally, if you have realsense cameras and have some experience with MeshLab or Blender, creating your customized dataset should be as easy as executing a few command line arguments.
+This repository contains tools to create object masks, bounding box labels and 3D reconstructed object mesh (.ply) for object sequences filmed with an RGB-D camera. This project can prepare training and testing data for various deep learning projects such as 6D object pose estimation projects singleshotpose, and many object detection (e.g., faster rcnn) and instance segmentation (e.g., mask rcnn) projects. Ideally, if you have realsense cameras and have some experience with MeshLab or Blender, creating your customized dataset should be as easy as executing a few command line arguments.
 
-This codes in this repository implement a raw 3D model acquisition pipeline through aruco markers and ICP registration. The raw 3D model obtained needs to be processed and noise-removed in a mesh processing software. After this step, there are functions to generate required labels in the LINEMOD style automatically. 
+This codes in this repository implement a raw 3D model acquisition pipeline through aruco markers and ICP registration. The raw 3D model obtained needs to be processed and noise-removed in a mesh processing software. After this step, there are functions to generate required labels in automatically. 
 
 The codes are currently written for a single object of interest per frame. They can be modified to create a dataset that has several items within a frame.
+
 ### License
 
 This code is released under the MIT License (refer to the LICENSE file for details).
