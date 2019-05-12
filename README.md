@@ -229,6 +229,10 @@ This should be everything you need for creating an customized dataset for single
 
 After you complete step 6 (generated image masks). Run:
 
+```python
+python get_BBs.py
+```
+This creates annotations.csv that contains class labels and bounding box information for all images under LINEMOD folder.
 
 
 If you encounter any problems with the code, want to report bugs, etc. please contact me at faninedinburgh[at]gmail[dot]com.
