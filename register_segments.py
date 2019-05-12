@@ -1,8 +1,8 @@
 """
 register_segments.py
 ---------------
-Create registered scene pointcloud with minimal amount of noise removal
-The registered pointcloud includes the table top, markers, and ambient noise
+Create registered scene pointcloud with ambient noise removal
+The registered pointcloud includes the table top, markers, and some noise
 This mesh needs to be processed in a mesh processing tool to remove the artifact
 
 """
@@ -93,24 +93,6 @@ def post_process(originals, voxel_Radius, inlier_Radius):
 
      return (points,colors,vote) 
 
-def load_images(path, ID):
-    
-    """
-    Load a color and a depth image by path and image ID 
-
-    """
-    global camera_intrinsics
-    
-    img_file = path + 'JPEGImages/%s.jpg' % (ID*LABEL_INTERVAL)
-    cad = cv2.imread(img_file)
-
-    depth_file = path + 'depth/%s.npy' % (ID*LABEL_INTERVAL)
-    depth = np.load(depth_file)
-    pointcloud = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
-
-
-    return (cad, pointcloud)
-
 
 def load_pcds(path, downsample = True, interval = 1):
 
@@ -123,7 +105,7 @@ def load_pcds(path, downsample = True, interval = 1):
     global voxel_size, camera_intrinsics 
     pcds= []
     
-    for Filename in xrange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
+    for Filename in trange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
         img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
         # mask = cv2.imread(img_file, 0)
         
@@ -147,37 +129,6 @@ def load_pcds(path, downsample = True, interval = 1):
             pcds.append(source)
     return pcds
 
-
-def load_pcd(path, Filename, downsample = True, interval = 1):
-
-     """
-     load pointcloud by path and down samle (if True) based on voxel_size 
-     
-     """
-    
-
-     global voxel_size, camera_intrinsics 
-    
- 
-     img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
-
-     cad = cv2.imread(img_file)
-     cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
-     depth_file = path + 'depth/%s.npy' % (Filename*interval)
-     depth = np.load(depth_file)
-     mask = depth.copy()
-     depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
-
-
-     source = PointCloud()
-     source.points = Vector3dVector(depth[mask>0])
-     source.colors = Vector3dVector(cad[mask>0])
-
-     if downsample == True:
-          source = voxel_down_sample(source, voxel_size = voxel_size)
-          estimate_normals(source, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
-       
-     return source
 
 
 def nearest_neighbour(a, b):
@@ -233,7 +184,7 @@ if __name__ == "__main__":
         print "Merge segments"
         originals = load_pcds(path, downsample = False, interval = RECONSTRUCTION_INTERVAL)     
         for point_id in trange(len(originals)):
-             originals[point_id].transform(Ts[RECONSTRUCTION_INTERVAL/LABEL_INTERVAL])
+             originals[point_id].transform(Ts[RECONSTRUCTION_INTERVAL/LABEL_INTERVAL*point_id])
 
         print "Apply post processing"
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
