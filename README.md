@@ -112,9 +112,10 @@ sudo python setup.py install
 
 ## Create dataset on customized items
 
-### 1. Set up for recording
+### 1. Preparation
 
 Color print the pdf with the correctly sized aruco markers in the arucomarkers folder. Affix the markers surrounding the object of interest as shown in the picture.
+
 ![BackFlow](doc/setup.png)
 
 ### 2. Record an object sequence
