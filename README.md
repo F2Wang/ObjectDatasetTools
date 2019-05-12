@@ -115,19 +115,36 @@ sudo python setup.py install
 1. Color print the pdf with the correctly sized aruco markers in the arucomarkers folder. Affix the markers surrounding the object of interest as shown in the picture.
 ![BackFlow](doc/1.jpg)
 
-2. Record an object sequence, record.py records an object video sequence after a countdown of 5 seconds for 40 seconds, you can change the recording interval or exit the recording by pressing "q". Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time. 
+2. Record an object sequence,
 
-Assume the object being recorded is a sugar box.
+Option 1: Record with a realsense camera
+
+Script is provided to record an object video sequence using a compatible realsense camera. You can run:
+
+```python
+python record.py LINEMOD/OBJECTNAME
+```
+e.g.,
 
 ```python
 python record.py LINEMOD/sugar
 ```
 
-Note that the project assumes all sequences are saved under the folder named "LINEMOD", use other folder names will cause an error. 
+to record a sequence of a sugar box. By default the script records for 40 seconds after a countdown of 5. You can change the recording interval or exit the recording by pressing "q". Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time. 
 
-If you are using a realsense camera, color images, depth aligned to color images, and camera parameters will be automatically saved under the directory of the sequence. If you are using other cameras, please put color images in JPEGImages folder and the aligned depth images in the depth folder. 
+Note that the project assumes all sequences are saved under the folder named "LINEMOD", use other folder names will cause an error to occur. 
+
+If you use record.py to create your sequence, color images, depth aligned to color images, and camera parameters will be automatically saved under the directory of the sequence. 
+
+Option 2: Use existing sequence or record with other cameras
+
+If you are using other cameras, please put color images in a folder named "JPEGImages" and the aligned depth images as numpy arrays in a folder named "depth". Name your color images in a sequential order from 0.jpg, 1.jpg ... 600.jpg and your depth images 0.npy ... 600.npy  you should also create a file intrinsics.json under the sequence directory and manually input the camera parameters in the format like below:
+
+{"fx": 614.4744262695312, "fy": 614.4745483398438, "height": 480, "width": 640, "ppy": 233.29214477539062, "ppx": 308.8282470703125, "ID": "620201000292"}
 
 If you don't know your camera's intrinsic, you can put a rough estimate in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
+
+An example sequence can be downloaded, create a directory named "LINEMOD", extract the example sequence, and put the extracted folder (timer) in LINEMOD. (https://drive.google.com/file/d/1qvKRW-jDPHSaJKkzttfXIoESN0O6Fksr/view?usp=sharing)
 
 3.  Compute transforms for all frames at the specified interval (interval can be changed in config/registrationParameters) against the first frame, save the transforms(4*4 homogenous transforms) as an numpy array (.npy).
 
