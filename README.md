@@ -138,9 +138,15 @@ python compute_gt_poses.py LINEMOD/sugar
 4.  Register all frames and create mesh for the registered scene.
 
 ```python
-python register_segments.py LINEMOD/sugar
+python register_scene.py LINEMOD/sugar
 ```
-A raw registeredScene.ply will be saved under the specified directory.
+A raw registeredScene.ply will be saved under the specified directory (e.g., LINEMOD/sugar). The registeredScene.ply is a reconstruction of the scene that includes the table top, markers, and any other objects exposed during the scanning, with some level of noise removal. The generated mesh looks something like this:
+
+![BackFlow](doc/unsegmented.png)
+
+Alternatively, if you want to save some effort removing all the unwanted background, you can try creating the mesh with register_segmented instead of register_scene. Register_segmented should be able to automatically removes all the unwanted background. However, this script currently uses some ad hoc methods for segmenting the background, therefore you may need to tune some parameters for it to work with your object. The most important knob to tune is "MAX_RADIUS", which cuts off any depth reading whose euclidean distance to the center of the aruco markers observed is longer than the value specified. This value is currently set at 0.2 m , if you have a larger object, you may need to increase this value to not cut off parts of your object. Result from running register_segmented looks something like this:
+
+![BackFlow](doc/segmented.png)
 
 5. Process the mesh
 
