@@ -129,14 +129,20 @@ If you are using a realsense camera, color images, depth aligned to color images
 
 If you don't know your camera's intrinsic, you can put a rough estimate in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
 
-3.  Register all frames and obtain a raw object mesh
+3.  Compute transforms for all frames at the specified interval (interval can be changed in config/registrationParameters) against the first frame, save the transforms(4*4 homogenous transforms) as an numpy array (.npy).
 
 ```python
 python compute_gt_poses.py LINEMOD/sugar
 ```
-Poses as a 4*4 homogenous transformations are saved for all frame as a .npy file, and a raw registeredScene.ply are saved under LINEMOD/sugar
 
-4. Process the mesh
+4.  Register all frames and create mesh for the registered scene.
+
+```python
+python register_segments.py LINEMOD/sugar
+```
+A raw registeredScene.ply will be saved under the specified directory.
+
+5. Process the mesh
 
 The mesh needs to be processed to 1) remove noises that are not the object of interest. 2) to complete the missing side.
 
@@ -146,7 +152,7 @@ Recent 6D pose estimation projects such as singleshotpose use mesh geometries pu
 
 Make sure that the processed mesh is free of ANY isolated noise, and is NOT saved as a binary format (Basically, you should follow the video closely).
 
-5. Create label files
+6. Create label files
 
 When you have completed step 1-4 for all customized objects, run
 
