@@ -28,7 +28,7 @@ def get_camera_intrinsic(folder):
     K[1, 1], K[1, 2] = float(camera_intrinsics['fy']), float(camera_intrinsics['ppy'])
 
     K[2, 2] = 1.
-    return K
+    return (camera_intrinsics, K)
 
 def compute_projection(points_3D,internal_calibration):
     points_3D = points_3D.T
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     
     for classlabel,folder in enumerate(folders):
         print folder[8:-1], "is assigned class label:", classlabel
-        K = get_camera_intrinsic(folder)
+        camera_intrinsics, K = get_camera_intrinsic(folder)
         path_label = folder + "labels"
         if not os.path.exists(path_label):
             os.makedirs(path_label)
@@ -111,8 +111,8 @@ if __name__ == "__main__":
             
             corners = compute_projection(transformed,K)
             corners = corners.T
-            corners[:,0] = corners[:,0]/640
-            corners[:,1] = corners[:,1]/480
+            corners[:,0] = corners[:,0]/int(camera_intrinsics['width'])
+            corners[:,1] = corners[:,1]/int(camera_intrinsics['height'])
 
 
             mesh_copy.apply_transform(transform)
@@ -152,9 +152,9 @@ if __name__ == "__main__":
                 for digit in pixel:
                     message = str(digit)[:8]  + " "
                     file.write(message)
-            message = str((max_x-min_x)/640.0)[:8]  + " "
+            message = str((max_x-min_x)/float(camera_intrinsics['width']))[:8]  + " "
             file.write(message) 
-            message = str((max_y-min_y)/480.0)[:8]
+            message = str((max_y-min_y)/float(camera_intrinsics['height']))[:8]
             file.write(message)
             file.close()
 
