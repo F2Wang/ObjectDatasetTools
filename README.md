@@ -51,7 +51,7 @@ sudo pip install numpy Cython==0.19 pypng scipy scikit-learn open3d-python sciki
 Note: the code was written for opencv ver > 3.0.0 and ver < 3.4.3, so the code should work out of the box if you install opencv anew as instructed. However, if you have already installed opencv, the code
 may need adjustment since different versions of opencv have slightly different API
 
-#### Step 5 (Optional):
+#### Step 5:
 
 Install librealsense and its python wrapper.
 
@@ -157,7 +157,7 @@ If you use record.py to create your sequence, color images, depth aligned to col
 
 #### Option 2: Use existing sequence or record with other cameras
 
-If you are using other cameras, please put color images in a folder named "JPEGImages" and the aligned depth images as numpy arrays in a folder named "depth". Name your color images in a sequential order from 0.jpg, 1.jpg ... 600.jpg and your depth images 0.npy ... 600.npy  you should also create a file intrinsics.json under the sequence directory and manually input the camera parameters in the format like below:
+If you are using other cameras, please put color images (.jpg) in a folder named "JPEGImages" and the **aligned** depth images as uint16 pngs in a folder named "depth". PLease note that the depth images need to be aligned to color images. Name your color images in a sequential order from 0.jpg, 1.jpg ... 600.jpg and your depth images 0.png ... 600.png  you should also create a file intrinsics.json under the sequence directory and manually input the camera parameters in the format like below:
 
 {"fx": 614.4744262695312, "fy": 614.4745483398438, "height": 480, "width": 640, "ppy": 233.29214477539062, "ppx": 308.8282470703125, "ID": "620201000292"}
 
