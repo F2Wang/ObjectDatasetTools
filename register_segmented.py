@@ -124,7 +124,7 @@ def load_pcds(path, downsample = True, interval = 1):
         distance = point_to_plane(depth,sol)
         sol = fitplane(sol,depth[(distance > -0.01) & (distance < 0.01)])
         distance = point_to_plane(depth,sol)
-        mask[distance < 0.005] = 0
+        mask[distance < 0.002] = 0
 
         # use statistical outlier remover to remove isolated noise from the scene
         distance2center = np.linalg.norm(depth - aruco_center, axis=2)
