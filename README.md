@@ -53,11 +53,14 @@ may need adjustment since different versions of opencv have slightly different A
 
 #### Step 5 (Optional):
 
-Install librealsense and pyrealsense wrapper (if you are using realsense camera F200, SR300)
+Install librealsense and its python wrapper.
 
-Note: If you do not need to use python wrapper for the driver, please install the latest SDK which is easy to install, the python wrapper only supports the legacy version, which is not supported anymore, and its installation manual is wrong.
+#### For legacy models (R200, F200, SR300, LR200, ZR200)
 
-(IMPORTANT): Check your kernel version and make sure you have 4.4 by running:
+Install librealsense legacy version v1.12.1 (https://github.com/IntelRealSense/librealsense/tree/v1.12.1),
+and 3rd party python wrapper for librealsense v1.x (https://github.com/toinsson/pyrealsense)
+
+First, check your kernel version and make sure you have 4.4 by running:
 
 ```bash
 uname -r
@@ -110,6 +113,18 @@ git clone https://github.com/toinsson/pyrealsense
 cd pyrealsense
 sudo python setup.py install
 ```
+#### For newer models (SR300 and D series)
+
+Install intel realsense SDK 2.0 (https://github.com/IntelRealSense/librealsense),
+and its offical python wrapper pyrealsense2
+
+Intel realsense SDK 2.0 can be installed easily with pre-build packages and supports multiple Ubuntu LTS kernels. Please follow the installation guide on their website.
+
+After installing the 2.0 SDK, install its python wrapper by 
+
+```bash
+pip install pyrealsense2
+```
 
 ## Create dataset on customized items
 
@@ -123,7 +138,7 @@ sudo python setup.py install
 
 #### Option 1: Record with a realsense camera
 
-Script is provided to record an object video sequence using a compatible realsense camera. You can run:
+Script is provided to record an object video sequence using a compatible realsense camera. Use record.py for legacy models and record12.py for librealsense SDK 2.0:  
 
 ```python
 python record.py LINEMOD/OBJECTNAME
