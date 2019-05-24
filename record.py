@@ -6,6 +6,11 @@ record.py
 Main Function for recording a video sequence into cad (color-aligned-to-depth) 
 images and depth images
 
+This code is compatible with legacy camera models supported on librealsense SDK v1
+and use 3rd party python wrapper https://github.com/toinsson/pyrealsense
+
+For the newer D series cameras, please use record2.py
+
 
 """
 
@@ -13,8 +18,9 @@ images and depth images
 # or exit the recording earlier by pressing q
 
 RECORD_LENGTH = 40
+import png
 
-
+import json
 import logging
 logging.basicConfig(level=logging.INFO)
 import numpy as np
@@ -23,8 +29,6 @@ import pyrealsense as pyrs
 import time
 import os
 import sys
-from pyrealsense.constants import rs_option
-# from config.DataAcquisitionParameters import DEPTH_THRESH
 
 def make_directories(folder):
     if not os.path.exists(folder+"JPEGImages/"):
@@ -37,41 +41,6 @@ def print_usage():
     print "Usage: record.py <foldername>"
     print "foldername: path where the recorded data should be stored at"
     print "e.g., record.py LINEMOD/mug"
-
-def save_color_intrinsics(folder):
-    import pyrealsense2 as rs
-    import json
-    
-    with pyrs.Service() as serv:
-        with serv.Device() as dev:
-            serial = dev.serial
-            dev.wait_for_frames()
-            c = dev.color
-            H,W,_ = c.shape
-
-    dev.stop()
-    serv.stop()
-   
-    pipeline = rs.pipeline()
-    config = rs.config()
-    config.enable_stream(rs.stream.color, W, H, rs.format.bgr8, 30)
-
-    # Start pipeline
-    profile = pipeline.start(config)
-    frames = pipeline.wait_for_frames()
-    color_frame = frames.get_color_frame()
-
-    # Color Intrinsics 
-    intr = color_frame.profile.as_video_stream_profile().intrinsics
-    pipeline.stop()
-    camera_parameters = {'ID': serial, 'fx': intr.fx, 'fy': intr.fy,
-                         'ppx': intr.ppx, 'ppy': intr.ppy,
-                         'height': intr.height, 'width': intr.width}
-
-    
-    with open(folder+'intrinsics.json', 'w') as fp:
-        json.dump(camera_parameters, fp)
-     
     
 
 if __name__ == "__main__":
@@ -82,11 +51,19 @@ if __name__ == "__main__":
         exit()
 
     make_directories(folder)
-    save_color_intrinsics(folder)
+    # save_color_intrinsics(folder)
     FileName=0
     
     with pyrs.Service() as serv:
         with serv.Device() as dev:
+            # Save color intrinsics to the corresponding folder
+            intr = dev.__getattribute__('color_intrinsics')
+            camera_parameters = {'ID': dev.serial, 'fx': intr.fx, 'fy': intr.fy,
+                                 'ppx': intr.ppx, 'ppy': intr.ppy,
+                                 'height': intr.height, 'width': intr.width}
+    
+            with open(folder+'intrinsics.json', 'w') as fp:
+                json.dump(camera_parameters, fp)
 
             # Set frame rate
             cnt = 0
@@ -94,6 +71,8 @@ if __name__ == "__main__":
             smoothing = 0.9
             fps_smooth = 30
             T_start = time.time()
+            
+            
             while True:
                 cnt += 1
                 if (cnt % 10) == 0:
@@ -108,18 +87,21 @@ if __name__ == "__main__":
                 c = cv2.cvtColor(c, cv2.COLOR_RGB2BGR)
                 d = dev.dac
 
-                # # perform the depth cut off
-                # d[d > DEPTH_THRESH/8.0*65535] == np.uint16(0)
-                # c[d == 0] = np.array([0,0,0],dtype = np.uint8)
                 
                 # Visualize count down
            
                 if time.time() -T_start > 5:
                     filecad= folder+"JPEGImages/%s.jpg" % FileName
-                    filedepth= folder+"depth/%s.npy" % FileName
+                    filedepth= folder+"depth/%s.png" % FileName
                     cv2.imwrite(filecad,c)
-                    np.save(filedepth,d)
+                    with open(filedepth, 'wb') as f:
+                        writer = png.Writer(width=d.shape[1], height=d.shape[0],
+                                            bitdepth=16, greyscale=True)
+                        zgray2list = d.tolist()
+                        writer.write(f, zgray2list)
+
                     FileName+=1
+                    
                 if time.time() -T_start > RECORD_LENGTH + 5:
                     dev.stop()
                     serv.stop()
