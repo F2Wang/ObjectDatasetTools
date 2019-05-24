@@ -8,6 +8,8 @@ This codes in this repository implement a raw 3D model acquisition pipeline thro
 
 The codes are currently written for a single object of interest per frame. They can be modified to create a dataset that has several items within a frame.
 
+![COVER](doc/cover.png)
+
 ## Installation
 
 [Installation](doc/installation.md) of this repository has been tested on a fresh install of Ubuntu 16.04 with Python 2.7. Installations on a wide range of intel realsense drivers and their python wrappers are also included.
