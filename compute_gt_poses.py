@@ -73,11 +73,8 @@ def marker_registration(source,target, MIN_MATCH_COUNT = 12):
                     feature_3D_src = depth_src[int(corner[1])][int(corner[0])]
                     feature_3D_des = depth_des[int(corners_des[i][0][count][1])][int(corners_des[i][0][count][0])]
                     if feature_3D_src[2]!=0 and feature_3D_des[2]!=0:
-                         print "1"
                          src_good.append(feature_3D_src)
                          dst_good.append(feature_3D_des)
-                    else:
-                         print "0"
     
      # get rigid transforms between 2 set of feature points through ransac
      try:
