@@ -10,7 +10,7 @@ The codes are currently written for a single object of interest per frame. They 
 
 ## Installation
 
-[Installation](docs/installation.md) of this repository has been tested on a fresh install of Ubuntu 16.04 with Python 2.7. Installations on a wide range of intel realsense drivers and their python wrappers are also included.
+[Installation](doc/installation.md) of this repository has been tested on a fresh install of Ubuntu 16.04 with Python 2.7. Installations on a wide range of intel realsense drivers and their python wrappers are also included.
 
 ## Create dataset on customized items
 
