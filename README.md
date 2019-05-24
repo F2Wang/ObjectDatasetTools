@@ -8,11 +8,6 @@ This codes in this repository implement a raw 3D model acquisition pipeline thro
 
 The codes are currently written for a single object of interest per frame. They can be modified to create a dataset that has several items within a frame.
 
-### License
-
-This code is released under the MIT License (refer to the LICENSE file for details).
-
-
 ## Installation
 
 The installation has been tested on a fresh install of Ubuntu 16.04 with Python 2.7
@@ -55,7 +50,7 @@ may need adjustment since different versions of opencv have slightly different A
 
 Install librealsense and its python wrapper.
 
-#### For legacy models (R200, F200, SR300, LR200, ZR200)
+#### 5.1: For legacy models (R200, F200, SR300, LR200, ZR200)
 
 Install librealsense legacy version v1.12.1 (https://github.com/IntelRealSense/librealsense/tree/v1.12.1),
 and 3rd party python wrapper for librealsense v1.x (https://github.com/toinsson/pyrealsense)
@@ -113,7 +108,7 @@ git clone https://github.com/toinsson/pyrealsense
 cd pyrealsense
 sudo python setup.py install
 ```
-#### For newer models (SR300 and D series)
+#### 5.2: For newer models (SR300 and D series)
 
 Install Intel realsense SDK 2.0 (https://github.com/IntelRealSense/librealsense),
 and its official python wrapper pyrealsense2
@@ -130,7 +125,7 @@ pip install pyrealsense2
 
 ### 1. Preparation
 
-**Color print** the pdf with the correctly sized aruco markers in the arucomarkers folder. Affix the markers surrounding the object of interest, as shown in the picture.
+**Color** print the pdf with the correctly sized aruco markers in the arucomarkers folder. Affix the markers surrounding the object of interest, as shown in the picture.
 
 ![BackFlow](doc/setup.png)
 
@@ -138,7 +133,7 @@ pip install pyrealsense2
 
 #### Option 1: Record with a realsense camera
 
-The script is provided to record an object video sequence using a compatible realsense camera. Use record.py for legacy models and record12.py for librealsense SDK 2.0:  
+The script is provided to record an object video sequence using a compatible realsense camera. Use record.py for legacy models and record2.py for librealsense SDK 2.0:  
 
 ```python
 python record.py LINEMOD/OBJECTNAME
@@ -161,9 +156,9 @@ If you are using other cameras, please put color images (.jpg) in a folder named
 
 {"fx": 614.4744262695312, "fy": 614.4745483398438, "height": 480, "width": 640, "ppy": 233.29214477539062, "ppx": 308.8282470703125, "ID": "620201000292"}
 
-If you don't know your camera's intrinsic, you can put a rough estimate in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
+If you don't know your camera's intrinsic, you can put a rough estimation in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
 
-An example sequence can be downloaded, create a directory named "LINEMOD", extract the example sequence, and put the extracted folder (timer) in LINEMOD. (https://drive.google.com/file/d/1qvKRW-jDPHSaJKkzttfXIoESN0O6Fksr/view?usp=sharing)
+An example sequence can be download [HERE](https://drive.google.com/open?id=1qvKRW-jDPHSaJKkzttfXIoESN0O6Fksr), create a directory named "LINEMOD", extract the example sequence, and put the extracted folder (timer) in LINEMOD. 
 
 ### 3. Obtain frame transforms
 
