@@ -22,6 +22,7 @@ import time
 import sys
 from config.registrationParameters import *
 import json
+import png
 
 # Set up parameters for registration
 # voxel sizes use to down sample raw pointcloud for fast ICP
@@ -72,8 +73,11 @@ def marker_registration(source,target, MIN_MATCH_COUNT = 12):
                     feature_3D_src = depth_src[int(corner[1])][int(corner[0])]
                     feature_3D_des = depth_des[int(corners_des[i][0][count][1])][int(corners_des[i][0][count][0])]
                     if feature_3D_src[2]!=0 and feature_3D_des[2]!=0:
+                         print "1"
                          src_good.append(feature_3D_src)
                          dst_good.append(feature_3D_des)
+                    else:
+                         print "0"
     
      # get rigid transforms between 2 set of feature points through ransac
      try:
@@ -199,8 +203,10 @@ def load_images(path, ID):
     img_file = path + 'JPEGImages/%s.jpg' % (ID*LABEL_INTERVAL)
     cad = cv2.imread(img_file)
 
-    depth_file = path + 'depth/%s.npy' % (ID*LABEL_INTERVAL)
-    depth = np.load(depth_file)
+    depth_file = path + 'depth/%s.png' % (ID*LABEL_INTERVAL)
+    reader = png.Reader(depth_file)
+    pngdata = reader.read()
+    depth = np.array(map(np.uint16, pngdata[2]))
     pointcloud = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
@@ -220,12 +226,13 @@ def load_pcds(path, downsample = True, interval = 1):
     
     for Filename in xrange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
         img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
-        # mask = cv2.imread(img_file, 0)
         
         cad = cv2.imread(img_file)
         cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
-        depth_file = path + 'depth/%s.npy' % (Filename*interval)
-        depth = np.load(depth_file)
+        depth_file = path + 'depth/%s.png' % (Filename*interval)
+        reader = png.Reader(depth_file)
+        pngdata = reader.read()
+        depth = np.array(map(np.uint16, pngdata[2]))
         mask = depth.copy()
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
@@ -258,8 +265,10 @@ def load_pcd(path, Filename, downsample = True, interval = 1):
 
      cad = cv2.imread(img_file)
      cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
-     depth_file = path + 'depth/%s.npy' % (Filename*interval)
-     depth = np.load(depth_file)
+     depth_file = path + 'depth/%s.png' % (Filename*interval)
+     reader = png.Reader(depth_file)
+     pngdata = reader.read()
+     depth = np.array(map(np.uint16, pngdata[2]))
      mask = depth.copy()
      depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 

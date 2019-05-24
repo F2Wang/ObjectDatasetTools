@@ -6,6 +6,7 @@ The registered pointcloud includes the table top, markers, and some noise
 This mesh needs to be processed in a mesh processing tool to remove the artifact
 
 """
+import png
 import random
 import cv2.aruco as aruco
 from open3d import *
@@ -111,8 +112,10 @@ def load_pcds(path, downsample = True, interval = 1):
         
         cad = cv2.imread(img_file)
         cad = cv2.cvtColor(cad, cv2.COLOR_BGR2RGB)
-        depth_file = path + 'depth/%s.npy' % (Filename*interval)
-        depth = np.load(depth_file)
+        depth_file = path + 'depth/%s.png' % (Filename*interval)
+        reader = png.Reader(depth_file)
+        pngdata = reader.read()
+        depth = np.array(map(np.uint16, pngdata[2]))
         mask = depth.copy()
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
