@@ -41,7 +41,7 @@ inlier_Radius = voxel_Radius * 2.5
 N_Neighbours = K_NEIGHBORS
 
 
-def marker_registration(source,target, MIN_MATCH_COUNT = 12):
+def marker_registration(source,target):
      cad_src, depth_src = source
      cad_des, depth_des = target
  
@@ -62,6 +62,12 @@ def marker_registration(source,target, MIN_MATCH_COUNT = 12):
               ids_des.append(_ids_des[i][0])
      except:
          return None
+
+     common = [x for x in ids_src if x in ids_des]
+  
+     if len(common) < 2:
+          # too few marker matches, use icp instead
+          return None
 
      
      src_good = []
@@ -142,20 +148,17 @@ def post_process(originals, voxel_Radius, inlier_Radius):
 def full_registration(path,max_correspondence_distance_coarse,
                       max_correspondence_distance_fine):
 
-     global N_Neighbours, LABEL_INTERVAL
+     global N_Neighbours, LABEL_INTERVAL, n_pcds
      pose_graph = PoseGraph()
      odometry = np.identity(4)
      pose_graph.nodes.append(PoseGraphNode(odometry))
-     n_pcds = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
+
      pcds = [[] for i in range(n_pcds)]
      for source_id in trange(n_pcds):
           if source_id > 0:
                pcds[source_id-1] = []
-          for target_id in range(source_id + 1, min(source_id + N_Neighbours,n_pcds)):
-               if not pcds[source_id]:
-                    pcds[source_id] = load_pcd(path, source_id, downsample = True)
-               if not pcds[target_id]:
-                    pcds[target_id] = load_pcd(path, target_id, downsample = True)
+          # for target_id in range(source_id + 1, min(source_id + N_Neighbours,n_pcds)):
+          for target_id in range(source_id + 1, n_pcds, max(1,int(n_pcds/N_Neighbours))):
                
                # derive pairwise registration through feature matching
                color_src, depth_src  = load_images(path, source_id)
@@ -163,9 +166,17 @@ def full_registration(path,max_correspondence_distance_coarse,
                res = marker_registration((color_src, depth_src),
                                       (color_dst, depth_dst))
 
+               if res is None and target_id != source_id + 1:
+                    # ignore such connections
+                    continue
+
+               if not pcds[source_id]:
+                    pcds[source_id] = load_pcd(path, source_id, downsample = True)
+               if not pcds[target_id]:
+                    pcds[target_id] = load_pcd(path, target_id, downsample = True)
+               
                if res is None:
                     # if marker_registration fails, perform pointcloud matching
-
                     transformation_icp, information_icp = icp(
                          pcds[source_id], pcds[target_id], voxel_size, max_correspondence_distance_coarse,
                          max_correspondence_distance_fine, method = ICP_METHOD)
@@ -181,11 +192,11 @@ def full_registration(path,max_correspondence_distance_coarse,
                     odometry = np.dot(transformation_icp, odometry)
                     pose_graph.nodes.append(PoseGraphNode(np.linalg.inv(odometry)))
                     pose_graph.edges.append(PoseGraphEdge(source_id, target_id,
-                                                       transformation_icp, information_icp, uncertain = False))
+                                                          transformation_icp, information_icp, uncertain = False))
                else:
                     # loop closure
                     pose_graph.edges.append(PoseGraphEdge(source_id, target_id,
-                                                  transformation_icp, information_icp, uncertain = True))
+                                                          transformation_icp, information_icp, uncertain = True))
 
      return pose_graph
 
@@ -332,6 +343,7 @@ if __name__ == "__main__":
 
         Ts = []
 
+        n_pcds = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
         print "Full registration ..."
         pose_graph = full_registration(path, max_correspondence_distance_coarse,
                                        max_correspondence_distance_fine)
