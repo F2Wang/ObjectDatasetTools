@@ -14,12 +14,12 @@ For the newer D series cameras, please use record2.py
 
 """
 
-# record for 40s after a 5s count down
+# record for 30s after a 5s count down
 # or exit the recording earlier by pressing q
 
-RECORD_LENGTH = 40
-import png
+RECORD_LENGTH = 30
 
+import png
 import json
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                     cv2.putText(c,str(5-int(time.time() -T_start)),(240,320), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 4,(0,0,255),2,cv2.LINE_AA)
                 if time.time() -T_start > RECORD_LENGTH:
                     cv2.putText(c,str(RECORD_LENGTH+5-int(time.time()-T_start)),(240,320), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 4,(0,0,255),2,cv2.LINE_AA)
-                cv2.imshow('COLOR IMAGE',c)
+                cv2.imshow('COLOR FRAME',c)
                 
            
                     
