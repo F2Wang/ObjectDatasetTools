@@ -1,9 +1,8 @@
 """
 makeTrainTestfiles.py
 ---------------
-
-Create directories to train and test images in train.txt
-and test.txt
+Split the train/test images with a simple 80/20 split
+Write the train/test image directories in train.txt and test.txt, 
 """
 
 import numpy as np
