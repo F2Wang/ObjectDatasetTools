@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
 
             mesh_copy.apply_transform(transform)
-            sample_points = mesh_copy.vertices
+            sample_points = mesh_copy.sample(10000)
             masks = compute_projection(sample_points,K)
             masks = masks.T
 
