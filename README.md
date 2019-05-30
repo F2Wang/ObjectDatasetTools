@@ -8,7 +8,7 @@ This codes in this repository implement a raw 3D model acquisition pipeline thro
 
 The codes are currently written for a single object of interest per frame. They can be modified to create a dataset that has several items within a frame.
 
-![COVER](doc/cover.png)
+![cover](doc/cover.png) ![mask](doc/sugar.gif)
 
 ## Installation
 
