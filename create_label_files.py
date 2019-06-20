@@ -41,9 +41,9 @@ def compute_projection(points_3D,internal_calibration):
 
 def print_usage():
     
-    print "Usage: create_label_files.py <path>"
-    print "path: all or name of the folder"
-    print "e.g., create_label_files.py all, create_label_files.py LINEMOD/Cheezit"
+    print("Usage: create_label_files.py <path>")
+    print("path: all or name of the folder")
+    print("e.g., create_label_files.py all, create_label_files.py LINEMOD/Cheezit")
     
     
 if __name__ == "__main__":
@@ -62,7 +62,8 @@ if __name__ == "__main__":
 
     
     for classlabel,folder in enumerate(folders):
-        print folder[8:-1], "is assigned class label:", classlabel
+        # print(folder[8:-1], "is assigned class label:", classlabel)
+        print("%s is assigned class label %d." % (folder[8:-1],classlabel))
         camera_intrinsics, K = get_camera_intrinsic(folder)
         path_label = folder + "labels"
         if not os.path.exists(path_label):
@@ -74,7 +75,11 @@ if __name__ == "__main__":
 
 
         transforms_file = folder + 'transforms.npy'
-        transforms = np.load(transforms_file)
+        try:
+            transforms = np.load(transforms_file)
+        except:
+            print("transforms not computed, run compute_gt_poses.py first")
+            continue
         mesh = trimesh.load(folder + "registeredScene.ply")
 
         Tform = mesh.apply_obb()

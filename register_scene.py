@@ -156,9 +156,9 @@ def nearest_neighbour(a, b):
 
 def print_usage():
     
-    print "Usage: register_scene.py <path>"
-    print "path: all or name of the folder"
-    print "e.g., register_scene.py all, register_scene.py LINEMOD/Cheezit"
+    print("Usage: register_scene.py <path>")
+    print("path: all or name of the folder")
+    print("e.g., register_scene.py all, register_scene.py LINEMOD/Cheezit")
     
     
 if __name__ == "__main__":
@@ -177,19 +177,19 @@ if __name__ == "__main__":
 
     for path in folders:
         
-        print path
+        print(path)
         with open(path+'intrinsics.json', 'r') as f:
              camera_intrinsics = json.load(f)
 
         Ts = np.load(path + 'transforms.npy')
 
 
-        print "Merge segments"
+        print("Merge segments")
         originals = load_pcds(path, downsample = False, interval = RECONSTRUCTION_INTERVAL)     
         for point_id in xrange(len(originals)):
              originals[point_id].transform(Ts[RECONSTRUCTION_INTERVAL/LABEL_INTERVAL*point_id])
 
-        print "Apply post processing"
+        print("Apply post processing")
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
         ply = Ply(points[vote>1], colors[vote>1])
         meshfile = path + 'registeredScene.ply'

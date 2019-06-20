@@ -36,9 +36,9 @@ def make_directories(folder):
 
 def print_usage():
     
-    print "Usage: record2.py <foldername>"
-    print "foldername: path where the recorded data should be stored at"
-    print "e.g., record2.py LINEMOD/mug"     
+    print("Usage: record2.py <foldername>")
+    print("foldername: path where the recorded data should be stored at")
+    print("e.g., record2.py LINEMOD/mug")     
     
 
 if __name__ == "__main__":

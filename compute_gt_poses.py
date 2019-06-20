@@ -314,9 +314,9 @@ def nearest_neighbour(a, b):
 
 def print_usage():
     
-    print "Usage: compute_gt_poses.py <path>"
-    print "path: all or name of the folder"
-    print "e.g., compute_gt_poses.py all, compute_gt_poses.py.py LINEMOD/Cheezit"
+    print("Usage: compute_gt_poses.py <path>")
+    print("path: all or name of the folder")
+    print("e.g., compute_gt_poses.py all, compute_gt_poses.py.py LINEMOD/Cheezit")
     
     
 if __name__ == "__main__":
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     for path in folders:
          
     
-        print path
+        print(path)
 
         with open(path+'intrinsics.json', 'r') as f:
              camera_intrinsics = json.load(f)
@@ -344,11 +344,11 @@ if __name__ == "__main__":
         Ts = []
 
         n_pcds = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
-        print "Full registration ..."
+        print("Full registration ...")
         pose_graph = full_registration(path, max_correspondence_distance_coarse,
                                        max_correspondence_distance_fine)
 
-        print "Optimizing PoseGraph ..."
+        print("Optimizing PoseGraph ...")
         option = GlobalOptimizationOption(
                 max_correspondence_distance = max_correspondence_distance_fine,
                 edge_prune_threshold = 0.25,

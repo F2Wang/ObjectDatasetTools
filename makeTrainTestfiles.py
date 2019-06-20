@@ -14,7 +14,7 @@ from config.registrationParameters import *
 
 folders = glob.glob("LINEMOD/*/")
 for classlabel,folder in enumerate(folders):
-    print folder
+    print(folder)
     try:
         transforms_file = folder + 'transforms.npy'
         transforms = np.load(transforms_file)

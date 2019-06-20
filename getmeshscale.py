@@ -12,9 +12,12 @@ def max_distance(points):
 
 folders = glob.glob("LINEMOD/*/")
 for classlabel,folder in enumerate(folders):
-    print folder
+    try:
+        print(folder)
 
-    mesh = trimesh.load(folder + folder[8:-1] +".ply")
-    vertices = mesh.vertices
-    maxD = max_distance(vertices.tolist())
-    print maxD
+        mesh = trimesh.load(folder + folder[8:-1] +".ply")
+        vertices = mesh.vertices
+        maxD = max_distance(vertices.tolist())
+        print("Max vertice distance is: %f m." % maxD)
+    except:
+        print("Mesh does not exist")
