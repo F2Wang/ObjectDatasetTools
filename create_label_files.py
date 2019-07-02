@@ -2,8 +2,15 @@
 create_label_files.py
 ---------------
 
-Create label files in compliant with the LINEMOD style
-used in singleshotpose
+This script produces:
+
+1. Reorient the processed registered_scene mesh in a mesh with an AABB centered at the
+   origin and the same dimensions as the OBB, saved under the name foldername.ply
+2. Create label files with class labels and projections of 3D BBs in the format
+   singleshotpose requires, saved under labels
+3. Create pixel-wise masks, saved under mask
+4. Save the homogeneous transform of object in regards to the foldername.ply in each 
+   frame
 """
 
 import numpy as np
