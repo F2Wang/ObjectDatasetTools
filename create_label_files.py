@@ -73,6 +73,11 @@ if __name__ == "__main__":
         if not os.path.exists(path_mask):
             os.makedirs(path_mask)
 
+        path_transforms = folder + "transforms"
+        if not os.path.exists(path_transforms):
+            os.makedirs(path_transforms)
+
+
 
         transforms_file = folder + 'transforms.npy'
         try:
@@ -80,13 +85,12 @@ if __name__ == "__main__":
         except:
             print("transforms not computed, run compute_gt_poses.py first")
             continue
+        
         mesh = trimesh.load(folder + "registeredScene.ply")
 
         Tform = mesh.apply_obb()
+        
         mesh.export(file_obj = folder + folder[8:-1] +".ply")
-
-        
-        
 
         points = mesh.bounding_box.vertices
         center = mesh.centroid
@@ -101,16 +105,15 @@ if __name__ == "__main__":
                            [max_x, max_y, min_z], [max_x, max_y, max_z]])
 
         points_original = np.concatenate((np.array([[center[0],center[1],center[2]]]), points))
-        points_original = trimesh.transformations.transform_points(points_original, np.linalg.inv(Tform))
+        points_original = trimesh.transformations.transform_points(points_original,
+                                                                   np.linalg.inv(Tform))
                     
         projections = [[],[]]
+        
         for i in trange(len(transforms)):
             mesh_copy = mesh.copy()
-            mesh_copy.apply_transform(np.linalg.inv(Tform))
-
             img = cv2.imread(folder+"JPEGImages/" + str(i*LABEL_INTERVAL) + ".jpg")
-            transform = transforms[i]
-            transform = np.linalg.inv(transform)
+            transform = np.linalg.inv(transforms[i])
             transformed = trimesh.transformations.transform_points(points_original, transform)
 
             
@@ -119,8 +122,11 @@ if __name__ == "__main__":
             corners[:,0] = corners[:,0]/int(camera_intrinsics['width'])
             corners[:,1] = corners[:,1]/int(camera_intrinsics['height'])
 
-
-            mesh_copy.apply_transform(transform)
+            T = np.dot(transform, np.linalg.inv(Tform))
+            mesh_copy.apply_transform(T)
+            filename = path_transforms + "/"+ str(i*LABEL_INTERVAL)+".npy"
+            np.save(filename, T)
+            
             sample_points = mesh_copy.sample(10000)
             masks = compute_projection(sample_points,K)
             masks = masks.T
