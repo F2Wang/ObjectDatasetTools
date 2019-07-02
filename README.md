@@ -110,7 +110,7 @@ or
 python create_label_files.py LINEMOD/sugar
 ```
 
-This step creates image masks (saved under mask) as well as labels files (saved under labels) which are projections of the 3D bounding box of the object onto the 2D images. It also creates new mesh files (e.g., sugar.ply) whose AABBs are centered at the origin and are the same dimensions as the OBB. The mask files can be used for training and testing purposes for a deep learning project (e.g., mask-rcnn) 
+This step creates a new mesh named foldername.ply (e.g., sugar.ply) whose AABB is centered at the origin and are the same dimensions as the OBB. It also produces image masks (saved under mask), 4 x 4 homogenious transforms in regards to the new mesh (saved under transforms), as well as labels files (saved under labels) which are projections of the 3D bounding box of the object onto the 2D images. The mask files can be used for training and testing purposes for a deep learning project (e.g., mask-rcnn) 
 
 ### (Optional) Create additional files required by singleshotpose
 
