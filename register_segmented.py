@@ -43,6 +43,9 @@ inlier_Radius = voxel_Radius * 2.5
 # search for up to N frames for registration, odometry only N=1, all frames N = np.inf
 N_Neighbours = K_NEIGHBORS
 
+FILLBOTTOM = True
+
+plane_equation = None
 
 def post_process(originals, voxel_Radius, inlier_Radius):
      """
@@ -105,7 +108,7 @@ def load_pcds(path, downsample = True, interval = 1):
     """
     
 
-    global voxel_size, camera_intrinsics 
+    global voxel_size, camera_intrinsics, plane_equation 
     pcds= []
     
     for Filename in trange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
@@ -125,6 +128,9 @@ def load_pcds(path, downsample = True, interval = 1):
         sol = findplane(cad,depth)
         distance = point_to_plane(depth,sol)
         sol = fitplane(sol,depth[(distance > -0.01) & (distance < 0.01)])
+        # record the plane equation on the first frame for point projections
+        if Filename == 0:
+             plane_equation = sol
         distance = point_to_plane(depth,sol)
         mask[distance < 0.002] = 0
 
@@ -182,13 +188,26 @@ def nearest_neighbour(a, b):
     return (dist, index)
 
 
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0: 
+       return v
+    return v/norm
+
+
 def print_usage():
     
     print("Usage: register_segmented.py <path>")
     print("path: all or name of the folder")
     print("e.g., register_segmented.py all, register_segmented.py LINEMOD/Cheezit")
     
+def point_to_plane2(X,p):
     
+    plane_xyz = p[0:3]
+    distance = (plane_xyz*X).sum(axis=1) + p[3]
+    distance = distance / np.linalg.norm(plane_xyz)
+    return distance
+
 if __name__ == "__main__":
   
     try:
@@ -219,7 +238,18 @@ if __name__ == "__main__":
 
         print("Apply post processing")
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
-        ply = Ply(points[vote>1], colors[vote>1])
+        points = points[vote>1]
+        colors = colors[vote>1]
+
+        if FILLBOTTOM:
+             plane_norm = normalize(np.array(plane_equation[:3]))
+             distance = point_to_plane2(points, plane_equation)
+             projections = np.subtract(points,
+                                      np.array([plane_norm*(i) for i in distance]))
+             points = np.concatenate((points, projections), axis=0)
+             colors = np.concatenate((colors, colors), axis=0)
+
+        ply = Ply(points, colors)
         meshfile = path + 'registeredScene.ply'
 
         ply.write(meshfile)
