@@ -9,7 +9,6 @@ Functions for registering (aligning) point clouds with ICP and feature registrat
 from open3d import *
 import numpy as np
 import cv2
-from itertools import combinations
 
 def icp(source,target,voxel_size,max_correspondence_distance_coarse,max_correspondence_distance_fine,
         method = "colored-icp"):
@@ -195,10 +194,6 @@ def match_ransac(p, p_prime, tol = 0.003):
     # the smallest 70% of the error is used to compute RMSE
     k= int(len(p)*0.7)
     assert len(p) == len(p_prime)
-    # for comb in combinations(range(0,len(p)), 3):
-        
-
-    # index = (np.array([comb[0],comb[1],comb[2]]),)
     R_temp,t_temp = rigid_transform_3D(p,p_prime)
     R_temp = np.array(R_temp)
     t_temp = (np.array(t_temp).T)[0]
