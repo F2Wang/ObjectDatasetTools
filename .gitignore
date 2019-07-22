@@ -1,0 +1,5 @@
+LINEMOD
+venv
+__pycache__
+launch.json
+settings.json
