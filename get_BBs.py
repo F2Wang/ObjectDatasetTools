@@ -13,7 +13,7 @@ print(folders)
 for folder in folders:
     classlabel = folder[:-1]
     len_dataset = len(glob.glob1(folder+"JPEGImages","*.jpg"))
-    for id in xrange(len_dataset):
+    for id in range(len_dataset):
         try:
             data = []
             imagepath = folder+"JPEGImages/" + str(id) + ".jpg"

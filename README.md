@@ -12,7 +12,7 @@ The codes are currently written for a single object of interest per frame. They 
 
 ## Installation
 
-[Installation](doc/installation.md) of this repository has been tested on a fresh install of Ubuntu 16.04 with Python 2.7, but should be compatible with Python 3 as well. Installations on a wide range of intel realsense drivers and their python wrappers are included.
+[Installation](doc/installation.md) of this repository has been tested on a fresh install of Ubuntu 16.04 with Python 3. Installations on a wide range of intel realsense drivers and their python wrappers are included.
 
 ## Create dataset on customized items
 
@@ -29,12 +29,12 @@ The codes are currently written for a single object of interest per frame. They 
 The script is provided to record an object video sequence using a compatible realsense camera. Use record.py for legacy models and record2.py for librealsense SDK 2.0:  
 
 ```python
-python record.py LINEMOD/OBJECTNAME
+python3 record.py LINEMOD/OBJECTNAME
 ```
 e.g.,
 
 ```python
-python record.py LINEMOD/sugar
+python3 record.py LINEMOD/sugar
 ```
 
 to record a sequence of a sugar box. By default, the script records for 40 seconds after a countdown of 5. You can change the recording interval or exit the recording by pressing "q". Please steadily move the camera to get different views of the object while maintaining that 2-3 markers are within the field of view of the camera at any time. 
@@ -58,13 +58,13 @@ An example sequence can be download [HERE](https://drive.google.com/file/d/1qvKR
 Compute transforms for frames at the specified interval (interval can be changed in config/registrationParameters) against the first frame, save the transforms(4*4 homogenous transforms) as a numpy array (.npy).
 
 ```python
-python compute_gt_poses.py LINEMOD/sugar
+python3 compute_gt_poses.py LINEMOD/sugar
 ```
 
 ### 4. Register all frames and create a mesh for the registered scene.
 
 ```python
-python register_scene.py LINEMOD/sugar
+python3 register_scene.py LINEMOD/sugar
 ```
 A raw registeredScene.ply will be saved under the specified directory (e.g., LINEMOD/sugar). The registeredScene.ply is a reconstruction of the scene that includes the table top, markers, and any other objects exposed during the scanning, with some level of noise removal. The generated mesh looks something like this:
 
@@ -73,7 +73,7 @@ A raw registeredScene.ply will be saved under the specified directory (e.g., LIN
 Alternatively, if you want to save some effort removing all the unwanted background, you can try creating the mesh with register_segmented instead of register_scene.
 
 ```python
-python register_segmented.py LINEMOD/sugar
+python3 register_segmented.py LINEMOD/sugar
 ```
 
 Register_segmented should be able to automatically removes all the unwanted background, and if enabled, auto complete the unseen bottom with flat surface. However, this script currently uses some ad hoc methods for segmenting the background, therefore you may need to tune some parameters for it to work with your object. The most important knob to tune is "MAX_RADIUS", which cuts off any depth reading whose Euclidean distance to the center of the aruco markers observed is longer than the value specified. This value is currently set at 0.2 m, if you have a larger object, you may need to increase this value to not cut off parts of your object. Result from running register_segmented looks something like this:
@@ -109,12 +109,12 @@ pip3 install shapely
 then run:
 
 ```python
-python create_label_files.py all
+python3 create_label_files.py all
 ```
 or 
 
 ```python
-python create_label_files.py LINEMOD/sugar
+python3 create_label_files.py LINEMOD/sugar
 ```
 
 This step creates a new mesh named foldername.ply (e.g., sugar.ply) whose AABB is centered at the origin and are the same dimensions as the OBB. It also produces image masks (saved under mask), 4 x 4 homogenious transforms in regards to the new mesh (saved under transforms), as well as labels files (saved under labels) which are projections of the 3D bounding box of the object onto the 2D images. The mask files can be used for training and testing purposes for a deep learning project (e.g., mask-rcnn) 
@@ -128,7 +128,7 @@ Masks and labels created in step 6 are compatible with singleshotpose. Currently
 In addition, you need to create train and test images
 
 ```python
-python makeTrainTestfiles.py
+python3 makeTrainTestfiles.py
 ```
 
 and create other required path files
@@ -138,7 +138,7 @@ For each of the customized object, create an objectname.data file in the cfg fol
 To get the object scale(max vertice distance), you can run
 
 ```python
-python getmeshscale.py
+python3 getmeshscale.py
 ```
 
 This should be everything you need for creating a customized dataset for singleshotpose, please don't forget to update the camera calibration parameters in singleshotpose as well.
@@ -148,7 +148,7 @@ This should be everything you need for creating a customized dataset for singles
 After you complete step 6 (generated image masks). Run:
 
 ```python
-python get_BBs.py
+python3 get_BBs.py
 ```
 This creates annotations.csv that contains class labels and bounding box information for all images under LINEMOD folder.
 
