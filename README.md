@@ -100,7 +100,13 @@ If you are creating the mesh as a by-product to obtain image masks, or use it fo
 
 ### 6. Create image masks and label files
 
-When you have completed step 1-4 for all customized objects, run
+When you have completed step 1-4 for all customized objects, first run
+
+```python
+pip3 install shapely
+```
+
+then run:
 
 ```python
 python create_label_files.py all
