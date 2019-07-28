@@ -214,7 +214,8 @@ def load_images(path, ID):
     depth_file = path + 'depth/%s.png' % (ID*LABEL_INTERVAL)
     reader = png.Reader(depth_file)
     pngdata = reader.read()
-    depth = np.array(map(np.uint16, pngdata[2]))
+    # depth = np.vstack(map(np.uint16, pngdata[2]))
+    depth = np.array(tuple(map(np.uint16, pngdata[2])))
     pointcloud = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
@@ -240,7 +241,8 @@ def load_pcds(path, downsample = True, interval = 1):
         depth_file = path + 'depth/%s.png' % (Filename*interval)
         reader = png.Reader(depth_file)
         pngdata = reader.read()
-        depth = np.array(map(np.uint16, pngdata[2]))
+        # depth = np.vstack(map(np.uint16, pngdata[2]))
+        depth = np.array(tuple(map(np.uint16, pngdata[2])))
         mask = depth.copy()
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
@@ -276,7 +278,8 @@ def load_pcd(path, Filename, downsample = True, interval = 1):
      depth_file = path + 'depth/%s.png' % (Filename*interval)
      reader = png.Reader(depth_file)
      pngdata = reader.read()
-     depth = np.array(map(np.uint16, pngdata[2]))
+     # depth = np.vstack(map(np.uint16, pngdata[2]))
+     depth = np.array(tuple(map(np.uint16, pngdata[2])))
      mask = depth.copy()
      depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
@@ -343,7 +346,7 @@ if __name__ == "__main__":
 
         Ts = []
 
-        n_pcds = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
+        n_pcds = int(len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL)
         print("Full registration ...")
         pose_graph = full_registration(path, max_correspondence_distance_coarse,
                                        max_correspondence_distance_fine)
@@ -359,7 +362,7 @@ if __name__ == "__main__":
 
 
 
-        num_annotations = len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL
+        num_annotations = int(len(glob.glob1(path+"JPEGImages","*.jpg"))/LABEL_INTERVAL)
 
         for point_id in range(num_annotations):
              Ts.append(pose_graph.nodes[point_id].pose)

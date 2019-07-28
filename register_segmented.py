@@ -111,7 +111,7 @@ def load_pcds(path, downsample = True, interval = 1):
     global voxel_size, camera_intrinsics, plane_equation 
     pcds= []
     
-    for Filename in trange(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval):
+    for Filename in trange(int(len(glob.glob1(path+"JPEGImages","*.jpg"))/interval)):
         img_file = path + 'JPEGImages/%s.jpg' % (Filename*interval)
         
         cad = cv2.imread(img_file)
@@ -119,7 +119,7 @@ def load_pcds(path, downsample = True, interval = 1):
         depth_file = path + 'depth/%s.png' % (Filename*interval)
         reader = png.Reader(depth_file)
         pngdata = reader.read()
-        depth = np.array(map(np.uint16, pngdata[2]))
+        depth = np.array(tuple(map(np.uint16, pngdata[2])))
         mask = depth.copy()
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
@@ -233,8 +233,8 @@ if __name__ == "__main__":
 
         print("Load and segment frames")
         originals = load_pcds(path, downsample = False, interval = RECONSTRUCTION_INTERVAL)     
-        for point_id in xrange(len(originals)):
-             originals[point_id].transform(Ts[RECONSTRUCTION_INTERVAL/LABEL_INTERVAL*point_id])
+        for point_id in range(len(originals)):
+             originals[point_id].transform(Ts[int(RECONSTRUCTION_INTERVAL/LABEL_INTERVAL)*point_id])
 
         print("Apply post processing")
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
