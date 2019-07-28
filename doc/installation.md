@@ -13,6 +13,7 @@ sudo apt-get upgrade
 #### Step 2:
 
 (Python2)
+
 Install pip, a Python package manager, and update
 
 ```bash
@@ -30,12 +31,13 @@ sudo -H pip3 install --upgrade pip
 Install the required packages through apt-get
 
 ```bash
-sudo apt-get install build-essential cmake git pkg-config libssl-dev
+sudo apt-get install build-essential cmake git pkg-config libssl-dev libgl1-mesa-glx
 ```
 
 #### Step 4:
 
 (Python2)
+
 Install the required packages through pip
 
 ```bash
