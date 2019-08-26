@@ -65,7 +65,9 @@ if __name__ == "__main__":
     intr = color_frame.profile.as_video_stream_profile().intrinsics
     camera_parameters = {'fx': intr.fx, 'fy': intr.fy,
                          'ppx': intr.ppx, 'ppy': intr.ppy,
-                         'height': intr.height, 'width': intr.width}
+                         'height': intr.height, 'width': intr.width,
+                         'depth_scale':profile.get_device().first_depth_sensor().get_depth_scale()
+    }
 
     
     with open(folder+'intrinsics.json', 'w') as fp:

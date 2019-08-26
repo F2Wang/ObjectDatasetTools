@@ -58,9 +58,10 @@ if __name__ == "__main__":
         with serv.Device() as dev:
             # Save color intrinsics to the corresponding folder
             intr = dev.__getattribute__('color_intrinsics')
-            camera_parameters = {'ID': dev.serial, 'fx': intr.fx, 'fy': intr.fy,
+            camera_parameters = {'fx': intr.fx, 'fy': intr.fy,
                                  'ppx': intr.ppx, 'ppy': intr.ppy,
-                                 'height': intr.height, 'width': intr.width}
+                                 'height': intr.height, 'width': intr.width,
+                                 'depth_scale':dev.depth_scale}
     
             with open(folder+'intrinsics.json', 'w') as fp:
                 json.dump(camera_parameters, fp)
