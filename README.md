@@ -113,6 +113,14 @@ python create_label_files.py LINEMOD/sugar
 
 This step creates a new mesh named foldername.ply (e.g., sugar.ply) whose AABB is centered at the origin and are the same dimensions as the OBB. It also produces image masks (saved under mask), 4 x 4 homogenious transforms in regards to the new mesh (saved under transforms), as well as labels files (saved under labels) which are projections of the 3D bounding box of the object onto the 2D images. The mask files can be used for training and testing purposes for a deep learning project (e.g., mask-rcnn) 
 
+Inspect the correctness of the created 3D bounding boxes and masks visually by running:
+
+
+```python
+python inspectMasks.py LINEMOD/sugar
+```
+
+
 ### (Optional) Create additional files required by singleshotpose
 
 If you create the mesh file for singleshot pose, you need to open those new mesh files in meshlab and save them again by unchecking the binary format option. Those meshes are used by singleshotpose for evaluation and pose estimation purpose, and singleshotpose cannot read mesh that is binary encoded.
