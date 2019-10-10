@@ -51,7 +51,7 @@ If you are using other cameras, please put color images (.jpg) in a folder named
 
 If you don't know your camera's intrinsic, you can put a rough estimation in. All parameters required are fx, fy, cx, cy, where commonly fx = fy and equals to the width of the image and cx and cy is the center of the image. For example, for a 640 x 480 resolution image, fx, fy = 480, cx = 320, cy = 240. 
 
-An example sequence can be download [HERE](https://drive.google.com/file/d/1qvKRW-jDPHSaJKkzttfXIoESN0O6Fksr/view?usp=sharing), create a directory named "LINEMOD", unzip the example sequence, and put the extracted folder (timer) under LINEMOD. 
+An example sequence can be download [HERE](https://drive.google.com/file/d/1BnW4OMR0UlIsaFAjeBuPWrbDgmqV-AY-/view?usp=sharing), create a directory named "LINEMOD", unzip the example sequence, and put the extracted folder (timer) under LINEMOD. 
 
 ### 3. Obtain frame transforms
 
