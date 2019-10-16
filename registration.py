@@ -162,7 +162,7 @@ def feature_registration(source,target, MIN_MATCH_COUNT = 12):
 
 
 
-def match_ransac(p, p_prime, tol = 0.003):
+def match_ransac(p, p_prime, tol = 0.01):
     """
     A ransac process that estimates the transform between two set of points
     p and p_prime.
