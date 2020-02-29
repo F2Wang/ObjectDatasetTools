@@ -149,9 +149,9 @@ def full_registration(path,max_correspondence_distance_coarse,
                       max_correspondence_distance_fine):
 
      global N_Neighbours, LABEL_INTERVAL, n_pcds
-     pose_graph = PoseGraph()
+     pose_graph = registration.PoseGraph()
      odometry = np.identity(4)
-     pose_graph.nodes.append(PoseGraphNode(odometry))
+     pose_graph.nodes.append(registration.PoseGraphNode(odometry))
 
      pcds = [[] for i in range(n_pcds)]
      for source_id in trange(n_pcds):
@@ -165,7 +165,7 @@ def full_registration(path,max_correspondence_distance_coarse,
                color_dst, depth_dst  = load_images(path, target_id)
                res = marker_registration((color_src, depth_src),
                                       (color_dst, depth_dst))
-
+               res = None
                if res is None and target_id != source_id + 1:
                     # ignore such connections
                     continue
@@ -174,7 +174,6 @@ def full_registration(path,max_correspondence_distance_coarse,
                     pcds[source_id] = load_pcd(path, source_id, downsample = True)
                if not pcds[target_id]:
                     pcds[target_id] = load_pcd(path, target_id, downsample = True)
-               
                if res is None:
                     # if marker_registration fails, perform pointcloud matching
                     transformation_icp, information_icp = icp(
@@ -183,19 +182,19 @@ def full_registration(path,max_correspondence_distance_coarse,
 
                else:
                     transformation_icp = res
-                    information_icp = get_information_matrix_from_point_clouds(
+                    information_icp = registration.get_information_matrix_from_point_clouds(
                          pcds[source_id], pcds[target_id], max_correspondence_distance_fine,
                          transformation_icp)
 
                if target_id == source_id + 1:
                     # odometry
                     odometry = np.dot(transformation_icp, odometry)
-                    pose_graph.nodes.append(PoseGraphNode(np.linalg.inv(odometry)))
-                    pose_graph.edges.append(PoseGraphEdge(source_id, target_id,
+                    pose_graph.nodes.append(registration.PoseGraphNode(np.linalg.inv(odometry)))
+                    pose_graph.edges.append(registration.PoseGraphEdge(source_id, target_id,
                                                           transformation_icp, information_icp, uncertain = False))
                else:
                     # loop closure
-                    pose_graph.edges.append(PoseGraphEdge(source_id, target_id,
+                    pose_graph.edges.append(registration.PoseGraphEdge(source_id, target_id,
                                                           transformation_icp, information_icp, uncertain = True))
 
      return pose_graph
@@ -247,13 +246,13 @@ def load_pcds(path, downsample = True, interval = 1):
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
-        source = PointCloud()
-        source.points = Vector3dVector(depth[mask>0])
-        source.colors = Vector3dVector(cad[mask>0])
+        source = geometry.PointCloud()
+        source.points = utility.Vector3dVector(depth[mask>0])
+        source.colors = utility.Vector3dVector(cad[mask>0])
 
         if downsample == True:
-            pcd_down = voxel_down_sample(source, voxel_size = voxel_size)
-            estimate_normals(pcd_down, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
+            pcd_down = source.voxel_down_sample(voxel_size = voxel_size)
+            pcd_down.estimate_normals(geometry.KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
             pcds.append(pcd_down)
         else:
             pcds.append(source)
@@ -284,13 +283,13 @@ def load_pcd(path, Filename, downsample = True, interval = 1):
      depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
-     source = PointCloud()
-     source.points = Vector3dVector(depth[mask>0])
-     source.colors = Vector3dVector(cad[mask>0])
+     source = geometry.PointCloud()
+     source.points = utility.Vector3dVector(depth[mask>0])
+     source.colors = utility.Vector3dVector(cad[mask>0])
 
      if downsample == True:
-          source = voxel_down_sample(source, voxel_size = voxel_size)
-          estimate_normals(source, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
+          source = source.voxel_down_sample(voxel_size = voxel_size)
+          source.estimate_normals(geometry.KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
        
      return source
 
@@ -352,13 +351,13 @@ if __name__ == "__main__":
                                        max_correspondence_distance_fine)
 
         print("Optimizing PoseGraph ...")
-        option = GlobalOptimizationOption(
+        option =registration.GlobalOptimizationOption(
                 max_correspondence_distance = max_correspondence_distance_fine,
                 edge_prune_threshold = 0.25,
                 reference_node = 0)
-        global_optimization(pose_graph,
-                GlobalOptimizationLevenbergMarquardt(),
-                GlobalOptimizationConvergenceCriteria(), option)
+        registration.global_optimization(pose_graph,
+                                         registration.GlobalOptimizationLevenbergMarquardt(),
+                                         registration.GlobalOptimizationConvergenceCriteria(), option)
 
 
 

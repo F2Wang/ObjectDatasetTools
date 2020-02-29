@@ -41,14 +41,14 @@ sudo apt-get install build-essential cmake git pkg-config libssl-dev libgl1-mesa
 Install the required packages through pip
 
 ```bash
-sudo pip install numpy Cython==0.19 pypng scipy scikit-learn open3d-python scikit-image open3d-python tqdm pykdtree opencv-python==3.3.0.10 opencv-contrib-python==3.3.0.10  trimesh==2.38.24
+sudo pip install numpy Cython==0.19 pypng scipy scikit-learn open3d==0.9.0 scikit-image open3d==0.9.0 tqdm pykdtree opencv-python==3.3.0.10 opencv-contrib-python==3.3.0.10  trimesh==2.38.24
 ```
 Note: the code was written for opencv ver > 3.0.0 and ver < 3.4.3, so the code should work out of the box if you install opencv anew as instructed. However, if you have already installed opencv, the code
 may need adjustment since different versions of opencv have slightly different API
 
 (Python3)
 ```bash
-sudo pip3 install numpy Cython==0.19 pypng scipy scikit-learn open3d-python scikit-image open3d-python tqdm pykdtree opencv-python==3.3.0.10 opencv-contrib-python==3.3.0.10  trimesh==2.38.24
+sudo pip3 install numpy Cython==0.19 pypng scipy scikit-learn open3d==0.9.0 scikit-image open3d==0.9.0 tqdm pykdtree opencv-python==3.3.0.10 opencv-contrib-python==3.3.0.10  trimesh==2.38.24
 ```
 
 #### Step 5:

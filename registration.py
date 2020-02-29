@@ -46,28 +46,27 @@ def icp(source,target,voxel_size,max_correspondence_distance_coarse,max_correspo
 
     assert method in ["point-to-plane","colored-icp"],"point-to-plane or colored-icp"
     if method == "point-to-plane":
-        icp_coarse = registration_icp(source, target,
-            max_correspondence_distance_coarse, np.identity(4),
-            TransformationEstimationPointToPlane())
-        icp_fine = registration_icp(source, target,
+        icp_coarse = registration.registration_icp(source, target,
+                                                   max_correspondence_distance_coarse, np.identity(4),
+                                                   registration.TransformationEstimationPointToPlane())
+        icp_fine = registration.registration_icp(source, target,
                 max_correspondence_distance_fine, icp_coarse.transformation,
-                TransformationEstimationPointToPlane())
+                registration.TransformationEstimationPointToPlane())
 
         transformation_icp = icp_fine.transformation
 
 
     if method == "colored-icp":
-        result_icp = registration_colored_icp(source,target,
-                voxel_size, np.identity(4),
-                ICPConvergenceCriteria(relative_fitness = 1e-8,
-                relative_rmse = 1e-8, max_iteration = 50))
+        result_icp = registration.registration_colored_icp(source,target,voxel_size, np.identity(4),
+                                                           registration.ICPConvergenceCriteria(relative_fitness = 1e-8,
+                                                                                               relative_rmse = 1e-8, max_iteration = 50))
 
         transformation_icp = result_icp.transformation
 
         
-    information_icp = get_information_matrix_from_point_clouds(
-            source, target, max_correspondence_distance_fine,
-            transformation_icp)
+    information_icp = registration.get_information_matrix_from_point_clouds(
+        source, target, max_correspondence_distance_fine,
+        transformation_icp)
     
     return transformation_icp, information_icp
 

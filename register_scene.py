@@ -120,13 +120,13 @@ def load_pcds(path, downsample = True, interval = 1):
         depth = convert_depth_frame_to_pointcloud(depth, camera_intrinsics)
 
 
-        source = PointCloud()
-        source.points = Vector3dVector(depth[mask>0])
-        source.colors = Vector3dVector(cad[mask>0])
+        source = geometry.PointCloud()
+        source.points = utility.Vector3dVector(depth[mask>0])
+        source.colors = utility.Vector3dVector(cad[mask>0])
 
         if downsample == True:
-            pcd_down = voxel_down_sample(source, voxel_size = voxel_size)
-            estimate_normals(pcd_down, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
+            pcd_down = source.voxel_down_sample(voxel_size = voxel_size)
+            pcd_down.estimate_normals(geometry.KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
             pcds.append(pcd_down)
         else:
             pcds.append(source)

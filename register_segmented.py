@@ -7,9 +7,7 @@ Use with caution, this script uses ad hoc rules for segmentation
 import png
 import random
 import cv2.aruco as aruco
-# from open3d import statistical_outlier_removal
-# from open3d import *
-import open3d
+from open3d import *
 import numpy as np
 import cv2
 import os
@@ -137,15 +135,14 @@ def load_pcds(path, downsample = True, interval = 1):
         # use statistical outlier remover to remove isolated noise from the scene
         distance2center = np.linalg.norm(depth - aruco_center, axis=2)
         mask[distance2center > MAX_RADIUS] = 0
-        source = open3d.PointCloud()
-        source.points = open3d.Vector3dVector(depth[mask>0])
-        source.colors = open3d.Vector3dVector(cad[mask>0])
-
-        cl,ind = open3d.statistical_outlier_removal(source,nb_neighbors=500, std_ratio=0.5)
-
+        source = geometry.PointCloud()
+        source.points = utility.Vector3dVector(depth[mask>0])
+        source.colors = utility.Vector3dVector(cad[mask>0])
+        cl, ind = source.remove_statistical_outlier(nb_neighbors=200,
+                                                    std_ratio=0.5)
         if downsample == True:
-            pcd_down = open3d.voxel_down_sample(cl, voxel_size = voxel_size)
-            open3d.estimate_normals(pcd_down, KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
+            pcd_down = cl.voxel_down_sample(voxel_size = voxel_size)
+            pcd_down.estimate_normals(geometry.KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
             pcds.append(pcd_down)
         else:
             pcds.append(cl)
@@ -246,8 +243,9 @@ if __name__ == "__main__":
              distance = point_to_plane2(points, plane_equation)
              projections = np.subtract(points,
                                       np.array([plane_norm*(i) for i in distance]))
+             grey = np.array([[150,150,150] for i in range(len(projections))])
              points = np.concatenate((points, projections), axis=0)
-             colors = np.concatenate((colors, colors), axis=0)
+             colors = np.concatenate((colors, grey), axis=0)
 
         ply = Ply(points, colors)
         meshfile = path + 'registeredScene.ply'
