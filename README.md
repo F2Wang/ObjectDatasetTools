@@ -66,22 +66,25 @@ python compute_gt_poses.py LINEMOD/sugar
 ```python
 python register_scene.py LINEMOD/sugar
 ```
-A raw registeredScene.ply will be saved under the specified directory (e.g., LINEMOD/sugar). The registeredScene.ply is a reconstruction of the scene that includes the table top, markers, and any other objects exposed during the scanning, with some level of noise removal. The generated mesh looks something like this:
+A raw registeredScene.ply will be saved under the specified directory (e.g., LINEMOD/sugar). The registeredScene.ply is a registered pointcloud of the scene that includes the table top, markers, and any other objects exposed during the scanning, with some level of noise removal. The generated mesh looks something like this and requires manual processing in step 5:
 
 ![BackFlow](doc/unsegmented.png)
 
-Alternatively, if you want to save some effort removing all the unwanted background, you can try creating the mesh with register_segmented instead of register_scene.
+Alternatively, you can try skipping all manual efforts by trying register_segmented instead of register_scene.
 
 ```python
 python register_segmented.py LINEMOD/sugar
 ```
+By default, register_segmented attempts to removes all unwanted backgrounds and performs surface reconstruction that converts the registered pointcloud into a triangular mesh. If MESHING is set to false, the script will only attempt to remove background and auto-complete the unseen bottom with a flat surface (If FILLBOTTOM is set to true), and you will need to do step 5.
 
-Register_segmented should be able to automatically removes all the unwanted background, and if enabled, auto complete the unseen bottom with flat surface. However, this script currently uses some ad hoc methods for segmenting the background, therefore you may need to tune some parameters for it to work with your object. The most important knob to tune is "MAX_RADIUS", which cuts off any depth reading whose Euclidean distance to the center of the aruco markers observed is longer than the value specified. This value is currently set at 0.2 m, if you have a larger object, you may need to increase this value to not cut off parts of your object. Result from running register_segmented looks something like this:
+However, register_segmented may fail as it uses some ad hoc methods for segmenting the background, therefore you may need to tune some parameters for it to work with your object. The most important knob to tune is "MAX_RADIUS", which cuts off any depth reading whose Euclidean distance to the center of the aruco markers observed is longer than the value specified. This value is currently set at 0.2 m, if you have a larger object, you may need to increase this value to not cut off parts of your object. Result from running register_segmented looks something like this:
 
 ![BackFlow](doc/segmented.png)
 
 
-### 5. Process the registered pointcloud manually
+### 5. Process the registered pointcloud manually (Optional)
+
+(03/03/2019) You can skip step 5 if you are satisfied with the result from running register_segmented.
 
 The registered pointcloud needs to be processed to 
 1) Remove background that is not of interest,
