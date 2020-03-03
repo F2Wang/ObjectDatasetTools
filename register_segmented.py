@@ -42,7 +42,7 @@ inlier_Radius = voxel_Radius * 2.5
 N_Neighbours = K_NEIGHBORS
 
 FILLBOTTOM = True
-
+MESHING = True
 plane_equation = None
 
 def post_process(originals, voxel_Radius, inlier_Radius):
@@ -237,15 +237,31 @@ if __name__ == "__main__":
         points, colors, vote = post_process(originals, voxel_Radius, inlier_Radius)
         points = points[vote>1]
         colors = colors[vote>1]
-
+ 
         if FILLBOTTOM:
              plane_norm = normalize(np.array(plane_equation[:3]))
              distance = point_to_plane2(points, plane_equation)
-             projections = np.subtract(points,
-                                      np.array([plane_norm*(i) for i in distance]))
+             projections = np.subtract(points, np.array([plane_norm*(i) for i in distance]))
              grey = np.array([[150,150,150] for i in range(len(projections))])
              points = np.concatenate((points, projections), axis=0)
              colors = np.concatenate((colors, grey), axis=0)
+
+
+        if MESHING:
+             # attempt segmentation
+              pcd = geometry.PointCloud()
+              pcd.points = utility.Vector3dVector(points)
+              pcd.colors = utility.Vector3dVector(colors/255)
+              pcd, _ = pcd.remove_statistical_outlier(20, 0.8)
+              pcd = pcd.voxel_down_sample(voxel_size=0.005)
+              pcd.estimate_normals(search_param=geometry.KDTreeSearchParamHybrid(radius=0.02, max_nn=30))
+              pcd.orient_normals_towards_camera_location(np.mean(np.array(pcd.points), axis = 0))
+              normals = np.negative(np.array(pcd.normals))
+              pcd.normals = utility.Vector3dVector(normals)          
+              mesh, _ = geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth = 10, linear_fit = True)
+              io.write_triangle_mesh(path + 'registeredScene.ply', mesh)
+              print("Mesh saved")
+              exit()
 
         ply = Ply(points, colors)
         meshfile = path + 'registeredScene.ply'
