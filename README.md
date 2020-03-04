@@ -84,7 +84,7 @@ However, register_segmented may fail as it uses some ad hoc methods for segmenti
 
 ### 5. Process the registered pointcloud manually (Optional)
 
-(03/03/2019) You can skip step 5 if you are satisfied with the result from running register_segmented.
+**(03/03/2019) You can skip step 5 if you are satisfied with the result from running register_segmented.**
 
 The registered pointcloud needs to be processed to 
 1) Remove background that is not of interest,
