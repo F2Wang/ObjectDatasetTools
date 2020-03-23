@@ -165,7 +165,8 @@ def full_registration(path,max_correspondence_distance_coarse,
                color_dst, depth_dst  = load_images(path, target_id)
                res = marker_registration((color_src, depth_src),
                                       (color_dst, depth_dst))
-               res = None
+
+     
                if res is None and target_id != source_id + 1:
                     # ignore such connections
                     continue
