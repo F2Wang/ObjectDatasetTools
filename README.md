@@ -18,13 +18,13 @@ The codes are currently written for a single object of interest per frame. They 
 
 ### 1. Preparation
 
-**Color** print the pdf with the correctly sized aruco markers in the arucomarkers folder. Affix the markers surrounding the object of interest, as shown in the picture.
+**Color** print the pdf with the correctly sized aruco markers (with ID 1-13) in the arucomarkers folder. Affix the markers surrounding the object of interest, as shown in the picture, make sure that you don't have markers with dulplicate IDS .
 
 ![BackFlow](doc/setup.png)
 
 ### 2. Record an object sequence
 
-#### Option 1: Record with a realsense camera
+#### Option 1: Record with a realsense camera (SR300 perfered)
 
 The script is provided to record an object video sequence using a compatible realsense camera. Use record.py for legacy models and record2.py for librealsense SDK 2.0:  
 
