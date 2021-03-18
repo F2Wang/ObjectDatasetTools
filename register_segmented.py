@@ -124,28 +124,29 @@ def load_pcds(path, downsample = True, interval = 1):
         aruco_center = get_aruco_center(cad,depth)
         # remove plane and anything underneath the plane from the pointcloud
         sol = findplane(cad,depth)
-        distance = point_to_plane(depth,sol)
-        sol = fitplane(sol,depth[(distance > -0.01) & (distance < 0.01)])
-        # record the plane equation on the first frame for point projections
-        if Filename == 0:
-             plane_equation = sol
-        distance = point_to_plane(depth,sol)
-        mask[distance < 0.002] = 0
+        if sol is not None:
+             distance = point_to_plane(depth,sol)
+             sol = fitplane(sol,depth[(distance > -0.01) & (distance < 0.01)])
+             # record the plane equation on the first frame for point projections
+             if Filename == 0:
+                  plane_equation = sol
+             distance = point_to_plane(depth,sol)
+             mask[distance < 0.002] = 0
 
-        # use statistical outlier remover to remove isolated noise from the scene
-        distance2center = np.linalg.norm(depth - aruco_center, axis=2)
-        mask[distance2center > MAX_RADIUS] = 0
-        source = geometry.PointCloud()
-        source.points = utility.Vector3dVector(depth[mask>0])
-        source.colors = utility.Vector3dVector(cad[mask>0])
-        cl, ind = source.remove_statistical_outlier(nb_neighbors=200,
-                                                    std_ratio=0.5)
-        if downsample == True:
-            pcd_down = cl.voxel_down_sample(voxel_size = voxel_size)
-            pcd_down.estimate_normals(geometry.KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
-            pcds.append(pcd_down)
-        else:
-            pcds.append(cl)
+             # use statistical outlier remover to remove isolated noise from the scene
+             distance2center = np.linalg.norm(depth - aruco_center, axis=2)
+             mask[distance2center > MAX_RADIUS] = 0
+             source = geometry.PointCloud()
+             source.points = utility.Vector3dVector(depth[mask>0])
+             source.colors = utility.Vector3dVector(cad[mask>0])
+             cl, ind = source.remove_statistical_outlier(nb_neighbors=200,
+                                                         std_ratio=0.5)
+             if downsample == True:
+                 pcd_down = cl.voxel_down_sample(voxel_size = voxel_size)
+                 pcd_down.estimate_normals(geometry.KDTreeSearchParamHybrid(radius = 0.002 * 2, max_nn = 30))
+                 pcds.append(pcd_down)
+             else:
+                 pcds.append(cl)
     return pcds
 
 def get_aruco_center(cad,d):
