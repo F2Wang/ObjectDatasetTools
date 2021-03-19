@@ -24,7 +24,7 @@ for folder in folders:
             mask = cv2.imread(mask_dir,0)
             thresh = cv2.threshold(mask.copy(), 30, 255, cv2.THRESH_BINARY)[1]
 
-            _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+            contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
             cnt = max(contours, key=cv2.contourArea)
             x,y,w,h = cv2.boundingRect(cnt)
             cv2.rectangle(img_original,(x,y),(x+w,y+h),(0,255,0),2)
