@@ -13,7 +13,7 @@ import cv2
 import cv2.aruco as aruco
 import glob
 import png
-import sys
+import sys, os
 
 def print_usage():
     
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     try:
         if sys.argv[1] == "all":
             folders = glob.glob("LINEMOD/*/")
-        elif sys.argv[1]+"/" in glob.glob("LINEMOD/*/"):
+        elif os.path.isdir(sys.argv[1]):
             folders = [sys.argv[1]+"/"]
         else:
             print_usage()
