@@ -72,7 +72,7 @@ if __name__ == "__main__":
   
     if sys.argv[1] == "all":
         folders = glob.glob("LINEMOD/*/")
-    elif sys.argv[1]+"/" in glob.glob("LINEMOD/*/"):
+    elif os.path.isdir(sys.argv[1]):
         folders = [sys.argv[1]+"/"]
     else:
         print_usage()

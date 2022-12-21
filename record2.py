@@ -15,6 +15,7 @@ Using librealsense SDK 2.0 with pyrealsense2 for SR300 and D series cameras
 # or exit the recording earlier by pressing q
 
 RECORD_LENGTH = 40
+NUM_RECORDS = 1236
 
 import png
 import pyrealsense2 as rs
@@ -104,14 +105,15 @@ if __name__ == "__main__":
                 writer.write(f, zgray2list)
 
             FileName+=1
-        if time.time() -T_start > RECORD_LENGTH + 5:
+        if FileName > NUM_RECORDS:
             pipeline.stop()
             break
 
         if time.time() -T_start < 5:
             cv2.putText(c,str(5-int(time.time() -T_start)),(240,320), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 4,(0,0,255),2,cv2.LINE_AA)
-        if time.time() -T_start > RECORD_LENGTH:
-            cv2.putText(c,str(RECORD_LENGTH+5-int(time.time()-T_start)),(240,320), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 4,(0,0,255),2,cv2.LINE_AA)
+        else:
+            cv2.putText(c,str(NUM_RECORDS - FileName),(240,320), cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, 4,(0,0,255),2,cv2.LINE_AA)
+
         cv2.imshow('COLOR IMAGE',c)
 
 

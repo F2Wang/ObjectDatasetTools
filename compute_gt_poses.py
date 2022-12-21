@@ -15,6 +15,7 @@ import os
 import glob
 from utils.ply import Ply
 from utils.camera import *
+from open3d import *
 from registration import icp, feature_registration, match_ransac, rigid_transform_3D
 from tqdm import trange
 from pykdtree.kdtree import KDTree
@@ -149,9 +150,9 @@ def full_registration(path,max_correspondence_distance_coarse,
                       max_correspondence_distance_fine):
 
      global N_Neighbours, LABEL_INTERVAL, n_pcds
-     pose_graph = registration.PoseGraph()
+     pose_graph = pipelines.registration.PoseGraph()
      odometry = np.identity(4)
-     pose_graph.nodes.append(registration.PoseGraphNode(odometry))
+     pose_graph.nodes.append(pipelines.registration.PoseGraphNode(odometry))
 
      pcds = [[] for i in range(n_pcds)]
      for source_id in trange(n_pcds):
@@ -183,19 +184,19 @@ def full_registration(path,max_correspondence_distance_coarse,
 
                else:
                     transformation_icp = res
-                    information_icp = registration.get_information_matrix_from_point_clouds(
+                    information_icp = pipelines.registration.get_information_matrix_from_point_clouds(
                          pcds[source_id], pcds[target_id], max_correspondence_distance_fine,
                          transformation_icp)
 
                if target_id == source_id + 1:
                     # odometry
                     odometry = np.dot(transformation_icp, odometry)
-                    pose_graph.nodes.append(registration.PoseGraphNode(np.linalg.inv(odometry)))
-                    pose_graph.edges.append(registration.PoseGraphEdge(source_id, target_id,
+                    pose_graph.nodes.append(pipelines.registration.PoseGraphNode(np.linalg.inv(odometry)))
+                    pose_graph.edges.append(pipelines.registration.PoseGraphEdge(source_id, target_id,
                                                           transformation_icp, information_icp, uncertain = False))
                else:
                     # loop closure
-                    pose_graph.edges.append(registration.PoseGraphEdge(source_id, target_id,
+                    pose_graph.edges.append(pipelines.registration.PoseGraphEdge(source_id, target_id,
                                                           transformation_icp, information_icp, uncertain = True))
 
      return pose_graph
@@ -327,7 +328,7 @@ if __name__ == "__main__":
     try:
         if sys.argv[1] == "all":
             folders = glob.glob("LINEMOD/*/")
-        elif sys.argv[1]+"/" in glob.glob("LINEMOD/*/"):
+        elif os.path.isdir(sys.argv[1]):
             folders = [sys.argv[1]+"/"]
         else:
             print_usage()
@@ -352,13 +353,13 @@ if __name__ == "__main__":
                                        max_correspondence_distance_fine)
 
         print("Optimizing PoseGraph ...")
-        option =registration.GlobalOptimizationOption(
+        option =pipelines.registration.GlobalOptimizationOption(
                 max_correspondence_distance = max_correspondence_distance_fine,
                 edge_prune_threshold = 0.25,
                 reference_node = 0)
-        registration.global_optimization(pose_graph,
-                                         registration.GlobalOptimizationLevenbergMarquardt(),
-                                         registration.GlobalOptimizationConvergenceCriteria(), option)
+        pipelines.registration.global_optimization(pose_graph,
+                                         pipelines.registration.GlobalOptimizationLevenbergMarquardt(),
+                                         pipelines.registration.GlobalOptimizationConvergenceCriteria(), option)
 
 
 

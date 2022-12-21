@@ -58,7 +58,7 @@ if __name__ == "__main__":
     try:
         if sys.argv[1] == "all":
             folders = glob.glob("LINEMOD/*/")
-        elif sys.argv[1]+"/" in glob.glob("LINEMOD/*/"):
+        elif os.path.isdir(sys.argv[1]):
             folders = [sys.argv[1]+"/"]
         else:
             print_usage()
@@ -151,7 +151,7 @@ if __name__ == "__main__":
    
             thresh = cv2.threshold(image_mask, 30, 255, cv2.THRESH_BINARY)[1]
     
-            _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+            contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
                                               cv2.CHAIN_APPROX_SIMPLE)
             cnt = max(contours, key=cv2.contourArea)
     
